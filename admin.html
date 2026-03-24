@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DJ Request — Admin</title>
+<title>Mii-Music — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,6 +19,7 @@
   .vinyl { width: 52px; height: 52px; background: #1a1a2e; border-radius: 50%; border: 3px solid #6c3fc5; margin: 0 auto .9rem; display: flex; align-items: center; justify-content: center; }
   .vinyl::after { content: ''; width: 14px; height: 14px; background: #6c3fc5; border-radius: 50%; }
   .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; color: #fff; line-height: 1; }
+  .hero h1 span { color: #a78be8; }
   .hero-sub { font-size: .7rem; color: #44425a; letter-spacing: 1.5px; text-transform: uppercase; margin-top: .3rem; }
 
   .panel { display: none; padding: 1.75rem; max-width: 560px; margin: 0 auto; }
@@ -121,7 +122,7 @@
 
 <div class="hero">
   <div class="vinyl"></div>
-  <h1>DJ Request</h1>
+  <h1>Mii<span>-</span>Music</h1>
   <div class="hero-sub">Admin Panel</div>
 </div>
 
@@ -419,6 +420,11 @@
   sync();
   loadRequests();
   initRealtime();
+
+  // Auto-refresh requests every 60 seconds
+  setInterval(function() {
+    loadRequests();
+  }, 60000);
 </script>
 </body>
 </html>
