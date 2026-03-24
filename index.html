@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Song Request</title>
+<title>Mii-Music · Song Request</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -302,11 +302,14 @@
     padding: 1.5rem;
     font-size: .65rem;
     color: #2a2840;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     position: relative;
     z-index: 1;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: .75rem;
   }
+  .footer span { color: #4a4860; }
 </style>
 </head>
 <body>
@@ -317,7 +320,7 @@
   <div class="screen active" id="screen-landing">
     <div class="landing-top">
       <div class="event-chip"><div class="event-chip-dot"></div><span id="l-event">Live Tonight</span></div>
-      <div class="dj-name" id="l-djname">DJ Nova</div>
+      <div class="dj-name" id="l-djname">Mii-Music</div>
       <div class="event-name" id="l-venue"></div>
       <p class="landing-prompt">What do you want to hear?</p>
       <div class="type-grid">
@@ -375,7 +378,7 @@
 
 </div>
 
-<div class="footer">Powered by DJ Request</div>
+<div class="footer">Powered by <span>Mii-Music</span></div>
 
 <script>
   var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
@@ -384,7 +387,7 @@
 
   var currentType = 'music';
   var params = new URLSearchParams(window.location.search);
-  var djName = params.get('dj') || 'DJ Nova';
+  var djName = params.get('dj') || 'Mii-Music';
   var eventName = params.get('event') || 'Live Tonight';
   var venue = params.get('venue') || '';
 
