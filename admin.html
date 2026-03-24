@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJ Request — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #0a0a0f; color: #f0eef8; min-height: 100vh; }
+
+  .nav { display: flex; border-bottom: 1px solid #1e1e2e; background: #0a0a0f; position: sticky; top: 0; z-index: 10; }
+  .nav-tab { flex: 1; padding: .85rem .25rem; text-align: center; font-size: .62rem; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: #44425a; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s; }
+  .nav-tab.active { color: #a78be8; border-bottom-color: #6c3fc5; }
+
+  .hero { padding: 2rem 2rem 1.75rem; text-align: center; border-bottom: 1px solid #1e1e2e; }
+  .vinyl { width: 52px; height: 52px; background: #1a1a2e; border-radius: 50%; border: 3px solid #6c3fc5; margin: 0 auto .9rem; display: flex; align-items: center; justify-content: center; }
+  .vinyl::after { content: ''; width: 14px; height: 14px; background: #6c3fc5; border-radius: 50%; }
+  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; color: #fff; line-height: 1; }
+  .hero-sub { font-size: .7rem; color: #44425a; letter-spacing: 1.5px; text-transform: uppercase; margin-top: .3rem; }
+
+  .panel { display: none; padding: 1.75rem; max-width: 560px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  .label { font-size: .66rem; letter-spacing: 2px; text-transform: uppercase; color: #44425a; margin-bottom: .55rem; }
+  .field { margin-bottom: 1.3rem; }
+  input[type=text], input[type=tel] { width: 100%; background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .75rem 1rem; color: #f0eef8; font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none; transition: border-color .2s; }
+  input:focus { border-color: #6c3fc5; }
+  input::placeholder { color: #34324a; }
+
+  .btn { width: 100%; padding: .85rem; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; cursor: pointer; transition: background .2s, transform .1s; }
+  .btn:active { transform: scale(.98); }
+  .btn-purple { background: #6c3fc5; color: #fff; }
+  .btn-purple:hover { background: #7d52d4; }
+  .btn-outline { background: transparent; border: 1px solid #2a2840; color: #a78be8; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; margin-top: .65rem; }
+  .btn-outline:hover { border-color: #6c3fc5; background: #12121c; }
+  .btn-sm { width: auto; padding: .32rem .8rem; font-size: .72rem; font-family: 'DM Sans', sans-serif; font-weight: 500; letter-spacing: .5px; border-radius: 6px; }
+
+  .divider { height: 1px; background: #1e1e2e; margin: 1.4rem 0; }
+
+  /* LIVE BADGE */
+  .live-badge { display: inline-flex; align-items: center; gap: 6px; background: #0d2e1a; border: 1px solid rgba(34,197,94,.25); border-radius: 100px; padding: .28rem .85rem; font-size: .68rem; color: #22c55e; }
+  .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* QR SHARE */
+  .qr-wrap { background: #fff; border-radius: 12px; padding: 1rem; width: fit-content; margin: 0 auto 1.25rem; }
+  .url-box { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .65rem 1rem; font-size: .78rem; color: #6b6880; font-family: monospace; word-break: break-all; margin-bottom: .75rem; }
+
+  /* FILTER TABS */
+  .filter-tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .ftab { background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .28rem .9rem; font-size: .72rem; font-weight: 500; color: #5c5a75; cursor: pointer; transition: all .2s; }
+  .ftab.active { background: #16122a; border-color: #6c3fc5; color: #a78be8; }
+  .ftab.karaoke-tab.active { background: #1a0e1a; border-color: #ec4899; color: #f472b6; }
+
+  /* BOARD */
+  .board-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; flex-wrap: wrap; gap: .5rem; }
+  .board-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: #fff; }
+  .count-badge { display: inline-flex; align-items: center; gap: 5px; background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .25rem .7rem; font-size: .68rem; color: #5c5a75; }
+
+  .req-list { display: flex; flex-direction: column; gap: .7rem; }
+  .req-card { background: #12121c; border: 1px solid #2a2840; border-radius: 12px; padding: .95rem 1.1rem; display: flex; align-items: flex-start; gap: .9rem; transition: border-color .2s, opacity .2s; animation: slideIn .3s ease; }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+  .req-card.playing { border-color: #6c3fc5; background: #16122a; }
+  .req-card.played { opacity: .4; }
+  .req-card.karaoke-card { border-left: 3px solid #ec489940; }
+  .req-card.karaoke-card.playing { border-color: #ec4899; background: #1a0e1a; }
+
+  .type-pip { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; margin-top: 2px; }
+  .pip-music { background: rgba(108,63,197,.15); }
+  .pip-karaoke { background: rgba(236,72,153,.15); }
+
+  .req-info { flex: 1; min-width: 0; }
+  .req-song { font-weight: 500; font-size: .93rem; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .req-artist { font-size: .76rem; color: #6b6880; margin-top: 2px; }
+  .req-meta { font-size: .68rem; color: #3a3850; margin-top: 4px; }
+  .req-tag { display: inline-block; border-radius: 4px; padding: 1px 6px; font-size: .62rem; font-weight: 500; margin-right: 4px; }
+  .tag-karaoke { background: rgba(236,72,153,.15); color: #f472b6; }
+  .tag-song { background: rgba(108,63,197,.15); color: #a78be8; }
+
+  .req-actions { display: flex; gap: .35rem; flex-shrink: 0; }
+  .icon-btn { background: #1a1830; border: 1px solid #2a2840; border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; transition: all .2s; color: #9997b0; }
+  .icon-btn.play:hover { background: #16122a; border-color: #6c3fc5; color: #a78be8; }
+  .icon-btn.done:hover { background: #0d2e1a; border-color: #22c55e; color: #22c55e; }
+  .icon-btn.del:hover { background: #2e0d0d; border-color: #e24b4a; color: #e24b4a; }
+
+  .empty-state { text-align: center; padding: 3rem 1rem; color: #2e2c44; }
+  .empty-icon { font-size: 2.5rem; margin-bottom: .6rem; opacity: .5; }
+  .empty-txt { font-size: .82rem; }
+
+  /* DISPLAY */
+  .display-screen { background: #06060f; border: 1px solid #1e1e2e; border-radius: 16px; padding: 2rem; min-height: 380px; }
+  .now-playing-section { margin-bottom: 1.5rem; }
+  .np-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .5rem; }
+  .np-song { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; color: #fff; line-height: 1.1; }
+  .np-artist { font-size: .9rem; color: #a78be8; margin-top: .25rem; }
+  .np-type { font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; margin-top: .4rem; }
+  .np-type.karaoke { color: #f472b6; }
+  .np-type.music { color: #a78be8; }
+  .np-empty { font-size: .88rem; color: #2e2c44; font-style: italic; }
+  .queue-section {}
+  .queue-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .75rem; }
+  .q-item { display: flex; align-items: center; gap: .8rem; background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 8px; padding: .6rem .9rem; margin-bottom: .45rem; }
+  .q-num { font-family: 'Bebas Neue', sans-serif; font-size: .95rem; color: #2a2840; min-width: 18px; }
+  .q-song { font-size: .82rem; font-weight: 500; color: #d0ceea; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .q-sub { font-size: .7rem; color: #3a3850; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .q-pip { font-size: .75rem; margin-left: auto; flex-shrink: 0; }
+
+  .fullscreen-btn { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; color: #6b6880; font-family: 'DM Sans', sans-serif; font-size: .75rem; padding: .45rem .9rem; cursor: pointer; transition: border-color .2s; }
+  .fullscreen-btn:hover { border-color: #6c3fc5; color: #a78be8; }
+  .display-hint { font-size: .68rem; color: #2a2840; text-align: center; margin-top: .75rem; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1830; border: 1px solid #2a2840; border-radius: 8px; padding: .6rem 1.25rem; font-size: .8rem; color: #a78be8; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="vinyl"></div>
+  <h1>DJ Request</h1>
+  <div class="hero-sub">Admin Panel</div>
+</div>
+
+<nav class="nav">
+  <button class="nav-tab active" onclick="go('setup')">Setup</button>
+  <button class="nav-tab" onclick="go('share')">QR Code</button>
+  <button class="nav-tab" onclick="go('board')">Requests</button>
+  <button class="nav-tab" onclick="go('display')">Display</button>
+</nav>
+
+<!-- SETUP -->
+<div id="tab-setup" class="panel active">
+  <div class="field"><div class="label">DJ / Host name</div><input type="text" id="dj-name" placeholder="e.g. DJ Nova" oninput="sync()"></div>
+  <div class="field"><div class="label">Event name</div><input type="text" id="dj-event" placeholder="e.g. Saturday Night Live" oninput="sync()"></div>
+  <div class="field"><div class="label">Venue (optional)</div><input type="text" id="dj-venue" placeholder="e.g. The Arch, Brighton" oninput="sync()"></div>
+  <button class="btn btn-purple" onclick="go('share')">Generate QR Code →</button>
+</div>
+
+<!-- SHARE / QR -->
+<div id="tab-share" class="panel">
+  <div style="display:flex;justify-content:center;margin-bottom:1.25rem">
+    <div class="live-badge"><div class="dot-live"></div>Live sync active</div>
+  </div>
+  <div class="label" style="text-align:center;margin-bottom:.75rem">Fan request QR code</div>
+  <div class="qr-wrap"><div id="qr-box"></div></div>
+  <div style="text-align:center;font-size:.65rem;color:#3a3850;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.25rem">Fans scan this to request a song or karaoke</div>
+  <div class="label">Fan link</div>
+  <div class="url-box" id="fan-url-display">Set up your details first</div>
+  <button class="btn btn-purple" onclick="copyFanLink()">Copy Fan Link</button>
+  <button class="btn btn-outline" onclick="openFanPage()">Preview Fan Page ↗</button>
+</div>
+
+<!-- REQUESTS BOARD -->
+<div id="tab-board" class="panel">
+  <div class="board-header">
+    <div class="board-title">Requests</div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <div class="live-badge"><div class="dot-live"></div><span id="req-count">0</span></div>
+      <button class="btn btn-outline btn-sm" onclick="clearPlayed()">Clear played</button>
+    </div>
+  </div>
+  <div class="filter-tabs">
+    <div class="ftab active" onclick="setFilter('all', this)">All</div>
+    <div class="ftab" onclick="setFilter('music', this)">🎵 Songs</div>
+    <div class="ftab karaoke-tab" onclick="setFilter('karaoke', this)">🎤 Karaoke</div>
+    <div class="ftab" onclick="setFilter('pending', this)">Pending</div>
+  </div>
+  <div class="req-list" id="req-list">
+    <div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-txt">No requests yet — share your QR code!</div></div>
+  </div>
+</div>
+
+<!-- DISPLAY -->
+<div id="tab-display" class="panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+    <div class="label" style="margin:0">Display screen</div>
+    <button class="fullscreen-btn" onclick="openFullscreen()">⛶ Fullscreen</button>
+  </div>
+  <div class="display-screen">
+    <div class="now-playing-section">
+      <div class="np-label">Now playing</div>
+      <div id="dp-song" class="np-song" style="display:none"></div>
+      <div id="dp-artist" class="np-artist" style="display:none"></div>
+      <div id="dp-type" class="np-type" style="display:none"></div>
+      <div id="dp-empty" class="np-empty">Nothing playing yet</div>
+    </div>
+    <div class="divider" style="margin:.85rem 0 1rem"></div>
+    <div class="queue-section">
+      <div class="queue-label">Up next</div>
+      <div id="queue-list"><div style="font-size:.8rem;color:#2e2c44;font-style:italic">Queue is empty</div></div>
+    </div>
+  </div>
+  <div class="display-hint">Mark requests as "Playing" in the Requests tab to show them here</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  var requests = [];
+  var currentFilter = 'all';
+  var FAN_URL_BASE = 'https://miimediatv-source.github.io/dj-request/index.html';
+
+  function fanURL() {
+    var v = getV();
+    return FAN_URL_BASE + '?dj=' + encodeURIComponent(v.name) + '&event=' + encodeURIComponent(v.event) + (v.venue ? '&venue=' + encodeURIComponent(v.venue) : '');
+  }
+
+  function getV() {
+    return {
+      name: document.getElementById('dj-name').value.trim() || 'DJ Nova',
+      event: document.getElementById('dj-event').value.trim() || 'Live Tonight',
+      venue: document.getElementById('dj-venue').value.trim()
+    };
+  }
+
+  function go(tab) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    var tabs = document.querySelectorAll('.nav-tab');
+    ['setup','share','board','display'].forEach(function(n,i){ if(n===tab) tabs[i].classList.add('active'); });
+    if (tab === 'share') genQR();
+    if (tab === 'display') renderDisplay();
+  }
+
+  function sync() {
+    var url = fanURL();
+    document.getElementById('fan-url-display').textContent = url;
+  }
+
+  function copyFanLink() {
+    navigator.clipboard.writeText(fanURL()).then(function(){ showToast('Fan link copied!'); });
+  }
+
+  function openFanPage() { window.open(fanURL(), '_blank'); }
+
+  var qrDone = false;
+  function genQR() {
+    var url = fanURL();
+    var box = document.getElementById('qr-box');
+    box.innerHTML = ''; qrDone = false;
+    document.getElementById('fan-url-display').textContent = url;
+    try {
+      new QRCode(box, { text: url, width: 200, height: 200, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M });
+      qrDone = true;
+    } catch(e) { box.textContent = 'Error generating QR'; }
+  }
+
+  function setFilter(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderBoard();
+  }
+
+  function filteredRequests() {
+    return requests.filter(function(r) {
+      if (r.status === 'deleted') return false;
+      if (currentFilter === 'music') return r.type === 'music' || !r.type;
+      if (currentFilter === 'karaoke') return r.type === 'karaoke';
+      if (currentFilter === 'pending') return r.status === 'pending';
+      return true;
+    });
+  }
+
+  function renderBoard() {
+    var visible = requests.filter(r => r.status !== 'deleted');
+    document.getElementById('req-count').textContent = visible.length + ' request' + (visible.length !== 1 ? 's' : '');
+    var list = document.getElementById('req-list');
+    var filtered = filteredRequests();
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">' + (currentFilter === 'karaoke' ? '🎤' : '🎵') + '</div><div class="empty-txt">No ' + (currentFilter === 'all' ? '' : currentFilter + ' ') + 'requests yet</div></div>';
+      return;
+    }
+    list.innerHTML = filtered.map(function(r, i) {
+      var isKaraoke = r.type === 'karaoke';
+      var cls = (r.status === 'playing' ? ' playing' : r.status === 'played' ? ' played' : '') + (isKaraoke ? ' karaoke-card' : '');
+      var playBtn = r.status !== 'playing'
+        ? '<div class="icon-btn play" title="Mark as playing" onclick="markPlaying(' + r.id + ')">▶</div>'
+        : '<div class="icon-btn" style="color:#6c3fc5;border-color:#6c3fc5">♪</div>';
+      var doneBtn = r.status !== 'played'
+        ? '<div class="icon-btn done" title="Mark as played" onclick="markPlayed(' + r.id + ')">✓</div>' : '';
+      var meta = 'from ' + esc(r.fan_name || 'Anonymous') + ' · ' + fmtTime(r.created_at);
+      if (isKaraoke && r.performer) meta = 'Performer: ' + esc(r.performer) + ' · ' + fmtTime(r.created_at);
+      return '<div class="req-card' + cls + '">' +
+        '<div class="type-pip ' + (isKaraoke ? 'pip-karaoke' : 'pip-music') + '">' + (isKaraoke ? '🎤' : '🎵') + '</div>' +
+        '<div class="req-info">' +
+          '<div class="req-song">' + esc(r.song) + '</div>' +
+          '<div class="req-artist">' + esc(r.artist || '—') + '</div>' +
+          '<div class="req-meta">' + meta + '</div>' +
+        '</div>' +
+        '<div class="req-actions">' + playBtn + doneBtn +
+        '<div class="icon-btn del" onclick="delReq(' + r.id + ')">✕</div></div></div>';
+    }).join('');
+  }
+
+  async function markPlaying(id) {
+    await sb.from('requests').update({ status: 'pending' }).eq('status', 'playing');
+    await sb.from('requests').update({ status: 'playing' }).eq('id', id);
+    requests.forEach(r => { if (r.status === 'playing') r.status = 'pending'; });
+    var r = requests.find(r => r.id === id); if (r) r.status = 'playing';
+    renderBoard(); renderDisplay();
+  }
+
+  async function markPlayed(id) {
+    await sb.from('requests').update({ status: 'played' }).eq('id', id);
+    var r = requests.find(r => r.id === id); if (r) r.status = 'played';
+    renderBoard(); renderDisplay();
+  }
+
+  async function delReq(id) {
+    await sb.from('requests').update({ status: 'deleted' }).eq('id', id);
+    var r = requests.find(r => r.id === id); if (r) r.status = 'deleted';
+    renderBoard(); renderDisplay();
+  }
+
+  async function clearPlayed() {
+    await sb.from('requests').update({ status: 'deleted' }).eq('status', 'played');
+    requests = requests.filter(r => r.status !== 'played' && r.status !== 'deleted');
+    renderBoard();
+  }
+
+  function renderDisplay() {
+    var playing = requests.find(r => r.status === 'playing');
+    var queue = requests.filter(r => r.status === 'pending');
+    var s = document.getElementById('dp-song'), a = document.getElementById('dp-artist'), tp = document.getElementById('dp-type'), e = document.getElementById('dp-empty');
+    if (playing) {
+      s.textContent = playing.song;
+      a.textContent = playing.artist || '';
+      tp.textContent = playing.type === 'karaoke' ? '🎤 Karaoke' + (playing.performer ? ' · ' + playing.performer : '') : '🎵 Song Request';
+      tp.className = 'np-type ' + (playing.type || 'music');
+      s.style.display = 'block'; a.style.display = playing.artist ? 'block' : 'none'; tp.style.display = 'block'; e.style.display = 'none';
+    } else {
+      s.style.display = 'none'; a.style.display = 'none'; tp.style.display = 'none'; e.style.display = 'block';
+    }
+    var ql = document.getElementById('queue-list');
+    if (!queue.length) { ql.innerHTML = '<div style="font-size:.8rem;color:#2e2c44;font-style:italic">Queue is empty</div>'; return; }
+    ql.innerHTML = queue.slice(0,6).map(function(r,i){
+      var sub = (r.artist || '') + (r.fan_name ? ' · from ' + r.fan_name : '');
+      if (r.type === 'karaoke' && r.performer) sub = 'Performer: ' + r.performer;
+      return '<div class="q-item"><div class="q-num">'+(i+1)+'</div>' +
+        '<div style="min-width:0;flex:1"><div class="q-song">'+esc(r.song)+'</div><div class="q-sub">'+esc(sub)+'</div></div>' +
+        '<div class="q-pip">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
+    }).join('');
+  }
+
+  function openFullscreen() {
+    var v = getV();
+    var playing = requests.find(r => r.status === 'playing');
+    var queue = requests.filter(r => r.status === 'pending');
+    var nowHtml = playing
+      ? '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:5vw;letter-spacing:3px;color:#fff;line-height:1.1">'+esc(playing.song)+'</div>'
+        +(playing.artist?'<div style="font-size:2vw;color:#a78be8;margin-top:.4rem">'+esc(playing.artist)+'</div>':'')
+        +'<div style="font-size:1.1vw;letter-spacing:2px;text-transform:uppercase;color:'+(playing.type==='karaoke'?'#f472b6':'#6c3fc5')+';margin-top:.5rem">'+(playing.type==='karaoke'?'🎤 Karaoke'+(playing.performer?' · '+esc(playing.performer):''):'🎵 Song Request')+'</div>'
+      : '<div style="font-size:2vw;color:#2e2c44;font-style:italic">Nothing playing yet</div>';
+    var qHtml = queue.slice(0,6).map(function(r,i){
+      var sub = (r.artist?esc(r.artist)+' · ':'') + (r.type==='karaoke'&&r.performer?'Performer: '+esc(r.performer):'from '+(r.fan_name||'Anonymous'));
+      return '<div style="display:flex;gap:1rem;align-items:center;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:8px;padding:.75rem 1.25rem;margin-bottom:.5rem">'
+        +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;color:#2a2840;min-width:24px">'+(i+1)+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:1.1rem;font-weight:500;color:#d0ceea">'+esc(r.song)+'</div>'
+        +'<div style="font-size:.82rem;color:#3a3850;margin-top:2px">'+sub+'</div></div>'
+        +'<div style="font-size:1.1rem">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
+    }).join('') || '<div style="font-size:1rem;color:#2e2c44;font-style:italic;padding:.5rem 0">Queue is empty</div>';
+    var w = window.open('','_blank','menubar=no,toolbar=no,location=no,status=no');
+    w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#06060f;color:#f0eef8;font-family:DM Sans,sans-serif;min-height:100vh;padding:4vw}</style></head><body>'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3vw">'
+      +'<div><div style="font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:.6rem">Now playing</div>'+nowHtml+'</div>'
+      +'<div style="text-align:right"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:#2e2c44">'+esc(v.name)+'</div>'
+      +'<div style="font-size:.8rem;color:#2e2c44;margin-top:3px">'+esc(v.event)+'</div></div></div>'
+      +'<hr style="border:none;border-top:1px solid #1e1e2e;margin-bottom:2.5vw">'
+      +'<div style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:1rem">Up next</div>'
+      +qHtml+'</body></html>');
+    w.document.close();
+  }
+
+  // Realtime
+  function initRealtime() {
+    sb.channel('requests-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, function(payload) {
+        if (payload.eventType === 'INSERT') {
+          requests.unshift(payload.new);
+          var icon = payload.new.type === 'karaoke' ? '🎤' : '🎵';
+          showToast(icon + ' New ' + (payload.new.type || 'song') + ' request: ' + payload.new.song);
+        } else if (payload.eventType === 'UPDATE') {
+          var idx = requests.findIndex(r => r.id === payload.new.id);
+          if (idx >= 0) requests[idx] = payload.new; else requests.unshift(payload.new);
+        } else if (payload.eventType === 'DELETE') {
+          requests = requests.filter(r => r.id !== payload.old.id);
+        }
+        renderBoard(); renderDisplay();
+      }).subscribe();
+  }
+
+  async function loadRequests() {
+    var res = await sb.from('requests').select('*').order('created_at', { ascending: false });
+    if (res.data) { requests = res.data; renderBoard(); renderDisplay(); }
+  }
+
+  function fmtTime(ts) { return ts ? new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : ''; }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function showToast(msg) {
+    var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  }
+
+  // Also need to update the SQL table - add type and performer columns
+  // Run this in Supabase SQL editor if not done:
+  // alter table requests add column if not exists type text default 'music';
+  // alter table requests add column if not exists performer text;
+
+  sync();
+  loadRequests();
+  initRealtime();
+</script>
+</body>
+</html>
