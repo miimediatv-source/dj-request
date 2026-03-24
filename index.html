@@ -1,255 +1,3 @@
-
-create app so people can message song requests to a dj, using a QR code and whatsaap or text message
-
-8:54 PM
-
-Reading frontend design skill
-Reading frontend design skill
-I'll create a DJ song request app with QR code generation and WhatsApp/SMS links. Let me think about the design — going for a dark, neon club aesthetic that feels right at home in a DJ booth.
-
-
-
-Here's your DJ Song Request app! Here's how to use it:
-
-Setup tab — Enter your DJ name, phone number, event name, and a custom prompt. Choose WhatsApp or SMS as the delivery method.
-
-Share tab — A QR code is generated automatically once you enter your phone number. Print it, put it on tables, or display it on screen. Fans scan it and their messaging app opens with a pre-filled message ready to send directly to you.
-
-Preview tab — See exactly what fans will experience and copy your WhatsApp link to share digitally too.
-
-How it works for fans:
-
-They scan the QR code with their phone camera
-WhatsApp (or SMS) opens automatically with a message pre-filled to you
-They fill in the song/artist and hit send — it goes straight to your phone
-Tips:
-
-Use +44 format for UK numbers (e.g. +447700900000)
-For WhatsApp, the link only works if you have WhatsApp on that number
-You can screenshot the QR code and print it or display it on a TV/monitor behind you
-also create a screen that will show any requests that come in on the screen
-
-9:02 PM
-Great idea! Since this is a browser-based app, it can't directly receive WhatsApp/SMS messages (those go to your phone). But I can build a live request board where fans submit requests through a web form, and the DJ sees them appear in real-time on a display screen — perfect for showing on a TV or monitor behind the decks.
-
-Let me rebuild the whole app with this added.
-
-
-
-The app now has 5 tabs:
-
-Setup — enter your DJ name, phone, event, and preferred contact method.
-
-Share — QR code + WhatsApp/SMS deep links. Fans scan or tap and their message app opens with a pre-filled template.
-
-Fan View — a web form fans can use to submit requests directly in the app (great if you share this page on a tablet at the bar, or link to it from your social media).
-
-Request Board — your DJ control panel. Every submitted request appears here with:
-
-▶ Play — marks it as "Now Playing" and pushes it to the display
-✓ Done — marks it as played (greys it out)
-✕ Remove — deletes it
-"Clear played" button to tidy up
-Display — a clean screen showing the current "Now Playing" track and the next 6 in the queue. Put this on a TV or second monitor behind the decks so the crowd can see what's coming up.
-
-Tip: The WhatsApp/SMS links and the web form both feed into the same Request Board, so you can use any combination.
-
-cant see it yet?
-
-9:05 PM
-The widget should be rendering in your chat — it sometimes takes a moment to load. Let me rebuild it as a clean HTML file you can download and open directly in any browser instead.
-
-
-Viewed a file, created a file, read a file
-Viewed a file, created a file, read a file
-Here's your DJ Request app as a downloadable HTML file! Download it and open it in any browser — no internet needed except for the Google Fonts (the QR library is loaded from a CDN).
-
-How to use it:
-
-Setup tab — Enter your DJ name, phone number, event name, and choose WhatsApp or SMS
-Share tab — Your QR code appears here. Print it, stick it on tables, or put it on a tablet at the bar
-Fan View tab — Fans can type requests directly into this page (great on a tablet)
-Requests tab — See all incoming requests. Hit ▶ to mark as "Now Playing", ✓ when done, ✕ to remove
-Display tab — Shows "Now Playing" + the queue. Hit ⛶ Fullscreen to pop it out onto a TV or second monitor
-Dj request app
-Code · HTML 
-so how can the whatsapp show in the html file, is it best to host online?
-
-9:13 PM
-Yes, hosting online is the best approach. Here's the situation:
-
-The core problem: WhatsApp and SMS links work fine — when a fan scans the QR code, their phone opens WhatsApp/SMS with a pre-filled message to your number. That part works perfectly offline.
-
-The limitation is the Request Board — requests submitted via the web form only exist in that one browser tab. If a fan opens the page on their phone and submits a request, it won't appear on your DJ laptop's screen because there's no shared database between devices.
-
-Your options:
-
-Option 1 — WhatsApp/SMS only (no hosting needed) Fans scan the QR → message goes straight to your phone via WhatsApp or SMS. Simple, works today, zero setup. You just read requests on your phone. The HTML file is just for generating the QR code and displaying the screen.
-
-Option 2 — Host it free online (best experience) Host the file so all devices share the same live request board. Fans visit the URL or scan the QR, submit a request in the browser, and it appears instantly on your display screen. Good free options:
-
-Q: Which approach would you like?
-A: Host it free on GitHub Pages
-
-9:13 PM
-Great choice! Here's exactly how to do it — it takes about 5 minutes and is completely free.
-
-Step-by-step:
-
-1. Create a GitHub account Go to github.com and sign up if you don't have one.
-
-2. Create a new repository
-
-Click the + button → New repository
-Name it something like dj-request
-Set it to Public
-Tick "Add a README file"
-Click Create repository
-3. Upload your HTML file
-
-In your new repo, click Add file → Upload files
-Drag in your dj-request-app.html file
-Rename it to index.html before uploading (GitHub Pages serves index.html as the homepage)
-Click Commit changes
-4. Enable GitHub Pages
-
-Go to Settings (top of your repo)
-Scroll down to Pages in the left sidebar
-Under Source, select Deploy from a branch
-Set branch to main, folder to / (root)
-Click Save
-5. Your site goes live at:
-
-https://YOUR-USERNAME.github.io/dj-request
-It usually takes 1–2 minutes to go live.
-
-Important limitation to know: Even hosted, the web form requests still won't sync between devices in real-time — GitHub Pages is static hosting (no database).
-
-To get true live syncing (fan submits on their phone → instantly appears on your DJ screen), you'd need the Supabase version. Want me to build that? It's still free and I can make it work with a simple setup — fans use the hosted URL, requests appear on your board in real time.
-
-https://miimediatv-source.github.io/dj-request
-
-9:26 PM
-Great, your site is live! Let me check it.
-
-
-Searched the web
-Searched the web
-Claude's response was interrupted
-so if people send a whats app, how to get the messages to show in Requests section?
-
-9:27 PM
-That's the key question! The honest answer is — WhatsApp messages can't be read by a website automatically. WhatsApp is a closed system and doesn't allow websites to pull in messages.
-
-Here are your real options:
-
-Option 1 — Switch to the web form (recommended) Instead of WhatsApp, fans scan the QR code and it opens your hosted webpage where they type their request. It submits into the Requests board. This is the cleanest DJ experience — but right now it doesn't sync live between devices (fan's phone → your laptop screen).
-
-Option 2 — Build it properly with Supabase (the real solution) This gives you:
-
-Fans scan QR → opens your hosted page → fills in song request → hits send
-Request instantly appears on your Requests board and Display screen in real time
-Works across all devices simultaneously
-Still completely free
-Option 3 — Keep WhatsApp but manage manually Fans WhatsApp you → you read it on your phone → you manually type it into the Requests board on your laptop. Simple but more work during a gig.
-
-The Supabase option is genuinely the best DJ tool experience and I can build it for you now. It would take about 10 minutes to set up on your end (create a free Supabase account, paste in two config values) and everything else is handled in the code.
-
-Q: How do you want to handle requests?
-A: Build with Supabase — real-time live sync
-
-9:27 PM
-Perfect! Let me build the full real-time version. First, here's what you need to do to set up Supabase (takes 5 mins), then I'll build the code.
-
-Step 1 — Create your free Supabase project
-
-Go to supabase.com and sign up
-Click New project
-Name it dj-request, choose a password, pick a region close to you (e.g. West Europe)
-Click Create new project and wait ~1 minute
-Step 2 — Create the requests table
-
-In your Supabase dashboard, click SQL Editor in the left sidebar
-Paste this and click Run:
-sql
-create table requests (
-  id bigint generated always as identity primary key,
-  song text not null,
-  artist text,
-  fan_name text,
-  status text default 'pending',
-  created_at timestamptz default now()
-);
-
-alter table requests enable row level security;
-
-create policy "Anyone can insert" on requests for insert with check (true);
-create policy "Anyone can read" on requests for select using (true);
-create policy "Anyone can update" on requests for update using (true);
-Step 3 — Get your credentials
-
-Go to Project Settings → API
-Copy your Project URL (looks like https://xxxx.supabase.co)
-Copy your anon public key (long string starting with eyJ...)
-Once you have those two values, paste them here and I'll build the complete app with real-time sync!
-
-Q: Where are you up to?
-A: Still setting up Supabase
-
-9:29 PM
-No rush! Take your time. When you're ready, come back and share:
-
-Your Project URL — looks like https://abcdefgh.supabase.co
-Your anon public key — long string starting with eyJ...
-You'll find both in Project Settings → API in your Supabase dashboard.
-
-Once you paste those in I'll build the full app straight away. 🎧
-
-Project URL - https://jnltpobmbtnixxumibpv.supabase.co
-
-10:58 PM
-Got the URL! Just need one more thing — your anon public key.
-
-It's on the same Project Settings → API page, under "Project API keys". It's the one labelled anon public and starts with eyJ... — it's a long string, just paste the whole thing here.
-
-Key = sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR
-
-10:58 PM
-Thanks! I have everything I need. Let me build the full real-time app now.
-
-
-Created a file, ran a command, read a file
-Created a file, ran a command, read a file
-Your new index.html is ready with full real-time Supabase sync! Here's what to do:
-
-Upload to GitHub Pages:
-
-Go to your repo at github.com/miimediatv-source/dj-request
-Click on index.html → click the pencil ✏️ edit icon
-Select all the text and delete it
-Paste in the new file contents
-Click Commit changes
-Or just drag and drop the new index.html file via Add file → Upload files (it'll replace the old one).
-
-How the live sync works now:
-
-Fan View tab — fans visit your URL and submit requests directly in the browser. Requests go straight into Supabase.
-Requests tab — requests appear instantly on your screen the moment a fan submits one, with a toast notification 🎵
-All devices are synced — your laptop, a tablet at the bar, your phone — all see the same live data
-The Web Form QR option in Setup generates a QR that takes fans directly to the fan view with your DJ name and event pre-filled
-The WhatsApp/SMS QR options are still there too for fans who prefer messaging directly to your phone.
-
-Index
-Code · HTML 
-
-
-
-
-
-Claude is AI and can make mistakes. Please double-check responses.
-Index · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -263,27 +11,27 @@ Copy
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
   body { font-family: 'DM Sans', sans-serif; background: #0a0a0f; color: #f0eef8; min-height: 100vh; }
- 
+
   .nav { display: flex; border-bottom: 1px solid #1e1e2e; background: #0a0a0f; position: sticky; top: 0; z-index: 10; }
   .nav-tab { flex: 1; padding: .85rem .25rem; text-align: center; font-size: .65rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: #44425a; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s; }
   .nav-tab.active { color: #a78be8; border-bottom-color: #6c3fc5; }
- 
+
   .hero { padding: 2.5rem 2rem 2rem; text-align: center; border-bottom: 1px solid #1e1e2e; position: relative; overflow: hidden; }
   .hero::before { content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 340px; height: 340px; background: radial-gradient(circle, rgba(108,63,197,.15) 0%, transparent 70%); pointer-events: none; }
   .vinyl { width: 56px; height: 56px; background: #1a1a2e; border-radius: 50%; border: 3px solid #6c3fc5; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
   .vinyl::after { content: ''; width: 15px; height: 15px; background: #6c3fc5; border-radius: 50%; }
   .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; letter-spacing: 4px; color: #fff; line-height: 1; }
   .hero p { font-size: .75rem; color: #5c5a75; letter-spacing: 1.5px; text-transform: uppercase; margin-top: .4rem; }
- 
+
   .panel { display: none; padding: 2rem; max-width: 520px; margin: 0 auto; }
   .panel.active { display: block; }
- 
+
   .label { font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; color: #44425a; margin-bottom: .6rem; }
   .field { margin-bottom: 1.4rem; }
   input[type=text], input[type=tel] { width: 100%; background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .75rem 1rem; color: #f0eef8; font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none; transition: border-color .2s; }
   input:focus { border-color: #6c3fc5; }
   input::placeholder { color: #34324a; }
- 
+
   .btn { width: 100%; padding: .9rem; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: 2px; cursor: pointer; transition: background .2s, transform .1s; }
   .btn:active { transform: scale(.98); }
   .btn-purple { background: #6c3fc5; color: #fff; }
@@ -292,15 +40,15 @@ Copy
   .btn-outline { background: transparent; border: 1px solid #2a2840; color: #a78be8; font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 500; margin-top: .75rem; }
   .btn-outline:hover { border-color: #6c3fc5; background: #12121c; }
   .btn-sm { width: auto; padding: .35rem .85rem; font-size: .75rem; font-family: 'DM Sans', sans-serif; font-weight: 500; letter-spacing: .5px; border-radius: 6px; }
- 
+
   .method-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.4rem; }
   .method-card { background: #12121c; border: 1px solid #2a2840; border-radius: 10px; padding: 1rem .5rem; cursor: pointer; text-align: center; transition: border-color .2s; }
   .method-card.sel { border-color: #6c3fc5; background: #16122a; }
   .method-icon { font-size: 1.6rem; margin-bottom: .35rem; }
   .method-lbl { font-size: .75rem; font-weight: 500; color: #a78be8; letter-spacing: .5px; }
- 
+
   .qr-wrap { background: #fff; border-radius: 12px; padding: 1rem; width: fit-content; margin: 0 auto 1.25rem; }
- 
+
   .link-row { background: #12121c; border: 1px solid #2a2840; border-radius: 10px; padding: .9rem 1.1rem; display: flex; align-items: center; gap: .85rem; margin-bottom: .65rem; cursor: pointer; transition: border-color .2s; }
   .link-row:hover { border-color: #6c3fc5; }
   .link-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
@@ -309,14 +57,14 @@ Copy
   .web-c { background: rgba(108,63,197,.15); color: #a78be8; }
   .link-title { font-size: .88rem; font-weight: 500; color: #f0eef8; }
   .link-sub { font-size: .73rem; color: #44425a; margin-top: 2px; }
- 
+
   .divider { height: 1px; background: #1e1e2e; margin: 1.5rem 0; }
- 
+
   /* LIVE BADGE */
   .live-badge { display: inline-flex; align-items: center; gap: 6px; background: #0d2e1a; border: 1px solid rgba(34,197,94,.3); border-radius: 100px; padding: .28rem .85rem; font-size: .7rem; color: #22c55e; }
   .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
- 
+
   /* BOARD */
   .board-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: .5rem; }
   .board-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; letter-spacing: 2px; color: #fff; }
@@ -339,14 +87,14 @@ Copy
   .empty-state { text-align: center; padding: 3.5rem 1rem; color: #2e2c44; }
   .empty-icon { font-size: 2.8rem; margin-bottom: .75rem; opacity: .5; }
   .empty-txt { font-size: .85rem; }
- 
+
   /* FAN FORM */
   .fan-form { background: #12121c; border: 1px solid #2a2840; border-radius: 14px; padding: 1.75rem 1.5rem; margin-bottom: 1rem; }
   .fan-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: #fff; margin-bottom: .25rem; }
   .fan-sub { font-size: .8rem; color: #5c5a75; margin-bottom: 1.5rem; }
   .success-msg { background: #0d2e1a; border: 1px solid rgba(34,197,94,.3); border-radius: 10px; padding: 1rem; text-align: center; font-size: .88rem; color: #22c55e; display: none; }
   .error-msg { background: #2e0d0d; border: 1px solid rgba(226,75,74,.3); border-radius: 10px; padding: 1rem; text-align: center; font-size: .88rem; color: #e24b4a; display: none; margin-top: .75rem; }
- 
+
   /* DISPLAY */
   .display-screen { background: #06060f; border: 1px solid #1e1e2e; border-radius: 16px; padding: 2rem; min-height: 400px; }
   .display-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
@@ -362,19 +110,19 @@ Copy
   .display-hint { font-size: .7rem; color: #2a2840; text-align: center; margin-top: .85rem; letter-spacing: .5px; }
   .fullscreen-btn { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; color: #6b6880; font-family: 'DM Sans', sans-serif; font-size: .78rem; padding: .5rem 1rem; cursor: pointer; transition: border-color .2s; }
   .fullscreen-btn:hover { border-color: #6c3fc5; color: #a78be8; }
- 
+
   .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1830; border: 1px solid #2a2840; border-radius: 8px; padding: .6rem 1.25rem; font-size: .82rem; color: #a78be8; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
   .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
- 
+
 <div class="hero">
   <div class="vinyl"></div>
   <h1>DJ Request</h1>
   <p id="hero-sub">Song request manager</p>
 </div>
- 
+
 <nav class="nav">
   <button class="nav-tab active" onclick="go('setup')">Setup</button>
   <button class="nav-tab" onclick="go('share')">Share</button>
@@ -382,7 +130,7 @@ Copy
   <button class="nav-tab" onclick="go('board')">Requests</button>
   <button class="nav-tab" onclick="go('display')">Display</button>
 </nav>
- 
+
 <!-- SETUP -->
 <div id="tab-setup" class="panel active">
   <div class="field"><div class="label">Your DJ name</div><input type="text" id="dj-name" placeholder="e.g. DJ Nova" oninput="sync()"></div>
@@ -397,7 +145,7 @@ Copy
   </div>
   <button class="btn btn-purple" onclick="go('share')">Next: Share →</button>
 </div>
- 
+
 <!-- SHARE -->
 <div id="tab-share" class="panel">
   <div style="display:flex;justify-content:center;margin-bottom:.75rem">
@@ -421,7 +169,7 @@ Copy
   </div>
   <button class="btn btn-outline" onclick="copyFormLink()">Copy fan request link</button>
 </div>
- 
+
 <!-- FAN VIEW -->
 <div id="tab-fan" class="panel">
   <div class="fan-form">
@@ -435,7 +183,7 @@ Copy
   </div>
   <div class="success-msg" id="succ">🎉 Request sent! The DJ has your song.</div>
 </div>
- 
+
 <!-- REQUESTS BOARD -->
 <div id="tab-board" class="panel">
   <div class="board-header">
@@ -449,7 +197,7 @@ Copy
     <div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-txt">No requests yet — share your QR code!</div></div>
   </div>
 </div>
- 
+
 <!-- DISPLAY -->
 <div id="tab-display" class="panel">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
@@ -475,18 +223,18 @@ Copy
   </div>
   <div class="display-hint">Mark requests as "Playing" in the Requests tab to show them here</div>
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <script>
   var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
- 
+
   var method = 'form';
   var requests = [];
   var realtimeSub = null;
- 
+
   // Init realtime subscription
   function initRealtime() {
     realtimeSub = sb.channel('requests-channel')
@@ -505,13 +253,13 @@ Copy
       })
       .subscribe();
   }
- 
+
   // Load all requests on start
   async function loadRequests() {
     var res = await sb.from('requests').select('*').order('created_at', { ascending: false });
     if (res.data) { requests = res.data; renderBoard(); renderDisplay(); }
   }
- 
+
   function go(tab) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -521,7 +269,7 @@ Copy
     if (tab === 'share') genQR();
     if (tab === 'display') renderDisplay();
   }
- 
+
   function getV() {
     return {
       name: document.getElementById('dj-name').value.trim() || 'Your DJ',
@@ -529,14 +277,14 @@ Copy
       event: document.getElementById('dj-event').value.trim() || "Tonight's event"
     };
   }
- 
+
   function setMethod(m) {
     method = m;
     document.getElementById('mw').classList.toggle('sel', m === 'whatsapp');
     document.getElementById('ms').classList.toggle('sel', m === 'sms');
     document.getElementById('mf').classList.toggle('sel', m === 'form');
   }
- 
+
   function sync() {
     var v = getV();
     document.getElementById('hero-sub').textContent = v.event;
@@ -549,7 +297,7 @@ Copy
     var formUrl = window.location.href.split('?')[0] + '?view=fan&dj=' + encodeURIComponent(v.name) + '&event=' + encodeURIComponent(v.event);
     document.getElementById('form-sub').textContent = formUrl.length > 50 ? formUrl.substring(0,50)+'...' : formUrl;
   }
- 
+
   function buildMsg(v) { return encodeURIComponent('🎵 Hey ' + v.name + '! Can you play [SONG] by [ARTIST]? — [Your name]'); }
   function waURL(v) { return v.phone ? 'https://wa.me/' + v.phone.replace('+','') + '?text=' + buildMsg(v) : null; }
   function smsURL(v) {
@@ -561,18 +309,18 @@ Copy
     var v = getV();
     return window.location.href.split('?')[0] + '?view=fan&dj=' + encodeURIComponent(v.name) + '&event=' + encodeURIComponent(v.event);
   }
- 
+
   function openLink(type) {
     var v = getV();
     var url = type === 'whatsapp' ? waURL(v) : smsURL(v);
     if (!url) { alert('Please enter your phone number in Setup first.'); return; }
     window.open(url, '_blank');
   }
- 
+
   function copyFormLink() {
     navigator.clipboard.writeText(formURL()).then(function(){ showToast('Fan link copied!'); });
   }
- 
+
   var qrDone = false;
   function genQR() {
     var box = document.getElementById('qr-box');
@@ -589,7 +337,7 @@ Copy
       qrDone = true;
     } catch(e) { box.textContent = 'QR generation failed'; }
   }
- 
+
   async function submitReq() {
     var song = document.getElementById('fan-song').value.trim();
     var artist = document.getElementById('fan-artist').value.trim();
@@ -608,7 +356,7 @@ Copy
     s.style.display = 'block';
     setTimeout(function(){ s.style.display = 'none'; }, 3000);
   }
- 
+
   function renderBoard() {
     var visible = requests.filter(r => r.status !== 'deleted');
     document.getElementById('req-count').textContent = visible.length + ' request' + (visible.length !== 1 ? 's' : '');
@@ -633,7 +381,7 @@ Copy
         '<div class="icon-btn del" title="Remove" onclick="delReq(' + r.id + ')">✕</div></div></div>';
     }).join('');
   }
- 
+
   async function markPlaying(id) {
     await sb.from('requests').update({ status: 'pending' }).eq('status', 'playing');
     await sb.from('requests').update({ status: 'playing' }).eq('id', id);
@@ -641,25 +389,25 @@ Copy
     var r = requests.find(r => r.id === id); if (r) r.status = 'playing';
     renderBoard(); renderDisplay();
   }
- 
+
   async function markPlayed(id) {
     await sb.from('requests').update({ status: 'played' }).eq('id', id);
     var r = requests.find(r => r.id === id); if (r) r.status = 'played';
     renderBoard(); renderDisplay();
   }
- 
+
   async function delReq(id) {
     await sb.from('requests').update({ status: 'deleted' }).eq('id', id);
     var r = requests.find(r => r.id === id); if (r) r.status = 'deleted';
     renderBoard(); renderDisplay();
   }
- 
+
   async function clearPlayed() {
     await sb.from('requests').update({ status: 'deleted' }).eq('status', 'played');
     requests = requests.filter(r => r.status !== 'played' && r.status !== 'deleted');
     renderBoard();
   }
- 
+
   function renderDisplay() {
     var playing = requests.find(r => r.status === 'playing');
     var queue = requests.filter(r => r.status === 'pending');
@@ -675,7 +423,7 @@ Copy
       return '<div class="q-item"><div class="q-num">'+(i+1)+'</div><div style="min-width:0"><div class="q-song">'+esc(r.song)+'</div><div class="q-artist">'+esc(r.artist||'')+(r.fan_name?' · from '+esc(r.fan_name):'')+'</div></div></div>';
     }).join('');
   }
- 
+
   function openFullscreen() {
     var v = getV();
     var playing = requests.find(r => r.status === 'playing');
@@ -701,22 +449,22 @@ Copy
       +'</body></html>');
     w.document.close();
   }
- 
+
   function fmtTime(ts) {
     if (!ts) return '';
     return new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   }
- 
+
   function esc(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
- 
+
   function showToast(msg) {
     var t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
     setTimeout(function(){ t.classList.remove('show'); }, 3000);
   }
- 
+
   // Check if loaded as fan view via URL param
   (function() {
     var params = new URLSearchParams(window.location.search);
@@ -729,11 +477,10 @@ Copy
       go('fan');
     }
   })();
- 
+
   sync();
   loadRequests();
   initRealtime();
 </script>
 </body>
 </html>
- 
