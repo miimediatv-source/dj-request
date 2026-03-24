@@ -41,12 +41,10 @@
 
   .divider { height: 1px; background: #1e1e2e; margin: 1.4rem 0; }
 
-  /* LIVE BADGE */
   .live-badge { display: inline-flex; align-items: center; gap: 6px; background: #0d2e1a; border: 1px solid rgba(34,197,94,.25); border-radius: 100px; padding: .28rem .85rem; font-size: .68rem; color: #22c55e; }
   .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-  /* QR SHARE */
   .qr-wrap { background: #fff; border-radius: 12px; padding: 1rem; width: fit-content; margin: 0 auto 1.25rem; }
   .url-box { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .65rem 1rem; font-size: .78rem; color: #6b6880; font-family: monospace; word-break: break-all; margin-bottom: .75rem; }
 
@@ -55,19 +53,29 @@
   .ftab { background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .28rem .9rem; font-size: .72rem; font-weight: 500; color: #5c5a75; cursor: pointer; transition: all .2s; }
   .ftab.active { background: #16122a; border-color: #6c3fc5; color: #a78be8; }
   .ftab.karaoke-tab.active { background: #1a0e1a; border-color: #ec4899; color: #f472b6; }
+  .ftab.pending-tab.active { background: #1a1200; border-color: #f59e0b; color: #fbbf24; }
 
   /* BOARD */
   .board-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; flex-wrap: wrap; gap: .5rem; }
   .board-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: #fff; }
-  .count-badge { display: inline-flex; align-items: center; gap: 5px; background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .25rem .7rem; font-size: .68rem; color: #5c5a75; }
 
   .req-list { display: flex; flex-direction: column; gap: .7rem; }
   .req-card { background: #12121c; border: 1px solid #2a2840; border-radius: 12px; padding: .95rem 1.1rem; display: flex; align-items: flex-start; gap: .9rem; transition: border-color .2s, opacity .2s; animation: slideIn .3s ease; }
   @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-  .req-card.playing { border-color: #6c3fc5; background: #16122a; }
-  .req-card.played { opacity: .4; }
-  .req-card.karaoke-card { border-left: 3px solid #ec489940; }
-  .req-card.karaoke-card.playing { border-color: #ec4899; background: #1a0e1a; }
+
+  /* Status styles */
+  .req-card.status-pending { border-left: 3px solid #f59e0b; }
+  .req-card.status-approved { border-left: 3px solid #22c55e; }
+  .req-card.status-playing { border-color: #6c3fc5; background: #16122a; }
+  .req-card.status-played { opacity: .4; }
+  .req-card.karaoke-card.status-playing { border-color: #ec4899; background: #1a0e1a; }
+
+  /* Status pill on card */
+  .status-pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 4px; padding: 2px 7px; font-size: .62rem; font-weight: 500; margin-top: 4px; }
+  .pill-pending { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+  .pill-approved { background: rgba(34,197,94,.12); color: #22c55e; border: 1px solid rgba(34,197,94,.2); }
+  .pill-playing { background: rgba(108,63,197,.15); color: #a78be8; border: 1px solid rgba(108,63,197,.25); }
+  .pill-played { background: rgba(255,255,255,.05); color: #44425a; border: 1px solid rgba(255,255,255,.08); }
 
   .type-pip { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; margin-top: 2px; }
   .pip-music { background: rgba(108,63,197,.15); }
@@ -76,24 +84,30 @@
   .req-info { flex: 1; min-width: 0; }
   .req-song { font-weight: 500; font-size: .93rem; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .req-artist { font-size: .76rem; color: #6b6880; margin-top: 2px; }
-  .req-meta { font-size: .68rem; color: #3a3850; margin-top: 4px; }
-  .req-tag { display: inline-block; border-radius: 4px; padding: 1px 6px; font-size: .62rem; font-weight: 500; margin-right: 4px; }
-  .tag-karaoke { background: rgba(236,72,153,.15); color: #f472b6; }
-  .tag-song { background: rgba(108,63,197,.15); color: #a78be8; }
+  .req-meta { font-size: .68rem; color: #3a3850; margin-top: 3px; }
 
-  .req-actions { display: flex; gap: .35rem; flex-shrink: 0; }
+  .req-actions { display: flex; gap: .35rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; max-width: 72px; }
   .icon-btn { background: #1a1830; border: 1px solid #2a2840; border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; transition: all .2s; color: #9997b0; }
+  .icon-btn.approve:hover { background: #0d2e1a; border-color: #22c55e; color: #22c55e; }
   .icon-btn.play:hover { background: #16122a; border-color: #6c3fc5; color: #a78be8; }
-  .icon-btn.done:hover { background: #0d2e1a; border-color: #22c55e; color: #22c55e; }
+  .icon-btn.done:hover { background: #1a1a0d; border-color: #6b7280; color: #9ca3af; }
   .icon-btn.del:hover { background: #2e0d0d; border-color: #e24b4a; color: #e24b4a; }
 
   .empty-state { text-align: center; padding: 3rem 1rem; color: #2e2c44; }
   .empty-icon { font-size: 2.5rem; margin-bottom: .6rem; opacity: .5; }
   .empty-txt { font-size: .82rem; }
 
+  /* LEGEND */
+  .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: .68rem; color: #5c5a75; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+  .ld-pending { background: #f59e0b; }
+  .ld-approved { background: #22c55e; }
+  .ld-playing { background: #6c3fc5; }
+  .ld-played { background: #3a3850; }
+
   /* DISPLAY */
   .display-screen { background: #06060f; border: 1px solid #1e1e2e; border-radius: 16px; padding: 2rem; min-height: 380px; }
-  .now-playing-section { margin-bottom: 1.5rem; }
   .np-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .5rem; }
   .np-song { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; color: #fff; line-height: 1.1; }
   .np-artist { font-size: .9rem; color: #a78be8; margin-top: .25rem; }
@@ -101,7 +115,6 @@
   .np-type.karaoke { color: #f472b6; }
   .np-type.music { color: #a78be8; }
   .np-empty { font-size: .88rem; color: #2e2c44; font-style: italic; }
-  .queue-section {}
   .queue-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .75rem; }
   .q-item { display: flex; align-items: center; gap: .8rem; background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 8px; padding: .6rem .9rem; margin-bottom: .45rem; }
   .q-num { font-family: 'Bebas Neue', sans-serif; font-size: .95rem; color: #2a2840; min-width: 18px; }
@@ -113,7 +126,6 @@
   .fullscreen-btn:hover { border-color: #6c3fc5; color: #a78be8; }
   .display-hint { font-size: .68rem; color: #2a2840; text-align: center; margin-top: .75rem; }
 
-  /* TOAST */
   .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1830; border: 1px solid #2a2840; border-radius: 8px; padding: .6rem 1.25rem; font-size: .8rem; color: #a78be8; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
   .toast.show { opacity: 1; }
 </style>
@@ -164,11 +176,21 @@
       <button class="btn btn-outline btn-sm" onclick="clearPlayed()">Clear played</button>
     </div>
   </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot ld-pending"></div>Awaiting approval</div>
+    <div class="legend-item"><div class="legend-dot ld-approved"></div>Approved — on display</div>
+    <div class="legend-item"><div class="legend-dot ld-playing"></div>Now playing</div>
+    <div class="legend-item"><div class="legend-dot ld-played"></div>Played</div>
+  </div>
+
   <div class="filter-tabs">
     <div class="ftab active" onclick="setFilter('all', this)">All</div>
+    <div class="ftab pending-tab" onclick="setFilter('pending', this)">⏳ Pending</div>
+    <div class="ftab" onclick="setFilter('approved', this)">✅ Approved</div>
     <div class="ftab" onclick="setFilter('music', this)">🎵 Songs</div>
     <div class="ftab karaoke-tab" onclick="setFilter('karaoke', this)">🎤 Karaoke</div>
-    <div class="ftab" onclick="setFilter('pending', this)">Pending</div>
   </div>
   <div class="req-list" id="req-list">
     <div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-txt">No requests yet — share your QR code!</div></div>
@@ -182,7 +204,7 @@
     <button class="fullscreen-btn" onclick="openFullscreen()">⛶ Fullscreen</button>
   </div>
   <div class="display-screen">
-    <div class="now-playing-section">
+    <div style="margin-bottom:1.5rem">
       <div class="np-label">Now playing</div>
       <div id="dp-song" class="np-song" style="display:none"></div>
       <div id="dp-artist" class="np-artist" style="display:none"></div>
@@ -190,12 +212,10 @@
       <div id="dp-empty" class="np-empty">Nothing playing yet</div>
     </div>
     <div class="divider" style="margin:.85rem 0 1rem"></div>
-    <div class="queue-section">
-      <div class="queue-label">Up next</div>
-      <div id="queue-list"><div style="font-size:.8rem;color:#2e2c44;font-style:italic">Queue is empty</div></div>
-    </div>
+    <div class="queue-label">Up next — approved requests</div>
+    <div id="queue-list"><div style="font-size:.8rem;color:#2e2c44;font-style:italic">No approved requests yet</div></div>
   </div>
-  <div class="display-hint">Mark requests as "Playing" in the Requests tab to show them here</div>
+  <div class="display-hint">Only approved requests appear on the display. Approve requests in the Requests tab.</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -216,7 +236,7 @@
 
   function getV() {
     return {
-      name: document.getElementById('dj-name').value.trim() || 'DJ Nova',
+      name: document.getElementById('dj-name').value.trim() || 'Mii-Music',
       event: document.getElementById('dj-event').value.trim() || 'Live Tonight',
       venue: document.getElementById('dj-venue').value.trim()
     };
@@ -233,8 +253,7 @@
   }
 
   function sync() {
-    var url = fanURL();
-    document.getElementById('fan-url-display').textContent = url;
+    document.getElementById('fan-url-display').textContent = fanURL();
   }
 
   function copyFanLink() {
@@ -243,15 +262,13 @@
 
   function openFanPage() { window.open(fanURL(), '_blank'); }
 
-  var qrDone = false;
   function genQR() {
     var url = fanURL();
     var box = document.getElementById('qr-box');
-    box.innerHTML = ''; qrDone = false;
+    box.innerHTML = '';
     document.getElementById('fan-url-display').textContent = url;
     try {
       new QRCode(box, { text: url, width: 200, height: 200, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M });
-      qrDone = true;
     } catch(e) { box.textContent = 'Error generating QR'; }
   }
 
@@ -265,11 +282,23 @@
   function filteredRequests() {
     return requests.filter(function(r) {
       if (r.status === 'deleted') return false;
-      if (currentFilter === 'music') return r.type === 'music' || !r.type;
-      if (currentFilter === 'karaoke') return r.type === 'karaoke';
       if (currentFilter === 'pending') return r.status === 'pending';
-      return true;
+      if (currentFilter === 'approved') return r.status === 'approved';
+      if (currentFilter === 'music') return (r.type === 'music' || !r.type) && r.status !== 'deleted';
+      if (currentFilter === 'karaoke') return r.type === 'karaoke';
+      return true; // 'all'
     });
+  }
+
+  function statusPill(status) {
+    var map = {
+      pending:  ['pill-pending',  '⏳ Awaiting approval'],
+      approved: ['pill-approved', '✅ Approved — on display'],
+      playing:  ['pill-playing',  '♪ Now playing'],
+      played:   ['pill-played',   '✓ Played']
+    };
+    var s = map[status] || map['pending'];
+    return '<span class="status-pill ' + s[0] + '">' + s[1] + '</span>';
   }
 
   function renderBoard() {
@@ -278,48 +307,76 @@
     var list = document.getElementById('req-list');
     var filtered = filteredRequests();
     if (!filtered.length) {
-      list.innerHTML = '<div class="empty-state"><div class="empty-icon">' + (currentFilter === 'karaoke' ? '🎤' : '🎵') + '</div><div class="empty-txt">No ' + (currentFilter === 'all' ? '' : currentFilter + ' ') + 'requests yet</div></div>';
+      var icons = { pending:'⏳', approved:'✅', karaoke:'🎤' };
+      var icon = icons[currentFilter] || '🎵';
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">'+icon+'</div><div class="empty-txt">No ' + (currentFilter === 'all' ? '' : currentFilter + ' ') + 'requests yet</div></div>';
       return;
     }
-    list.innerHTML = filtered.map(function(r, i) {
+
+    list.innerHTML = filtered.map(function(r) {
       var isKaraoke = r.type === 'karaoke';
-      var cls = (r.status === 'playing' ? ' playing' : r.status === 'played' ? ' played' : '') + (isKaraoke ? ' karaoke-card' : '');
-      var playBtn = r.status !== 'playing'
-        ? '<div class="icon-btn play" title="Mark as playing" onclick="markPlaying(' + r.id + ')">▶</div>'
-        : '<div class="icon-btn" style="color:#6c3fc5;border-color:#6c3fc5">♪</div>';
-      var doneBtn = r.status !== 'played'
-        ? '<div class="icon-btn done" title="Mark as played" onclick="markPlayed(' + r.id + ')">✓</div>' : '';
+      var statusClass = 'status-' + (r.status || 'pending');
+      var cls = statusClass + (isKaraoke ? ' karaoke-card' : '');
       var meta = 'from ' + esc(r.fan_name || 'Anonymous') + ' · ' + fmtTime(r.created_at);
       if (isKaraoke && r.performer) meta = 'Performer: ' + esc(r.performer) + ' · ' + fmtTime(r.created_at);
-      return '<div class="req-card' + cls + '">' +
+
+      // Action buttons based on status
+      var actions = '';
+      if (r.status === 'pending') {
+        actions += '<div class="icon-btn approve" title="Approve — adds to display queue" onclick="approveReq('+r.id+')">✓</div>';
+      }
+      if (r.status === 'approved') {
+        actions += '<div class="icon-btn play" title="Mark as now playing" onclick="markPlaying('+r.id+')">▶</div>';
+      }
+      if (r.status === 'playing') {
+        actions += '<div class="icon-btn" style="color:#6c3fc5;border-color:#6c3fc5;cursor:default">♪</div>';
+        actions += '<div class="icon-btn done" title="Mark as played" onclick="markPlayed('+r.id+')">✓</div>';
+      }
+      if (r.status !== 'playing') {
+        actions += '<div class="icon-btn del" title="Remove" onclick="delReq('+r.id+')">✕</div>';
+      }
+
+      return '<div class="req-card ' + cls + '">' +
         '<div class="type-pip ' + (isKaraoke ? 'pip-karaoke' : 'pip-music') + '">' + (isKaraoke ? '🎤' : '🎵') + '</div>' +
         '<div class="req-info">' +
           '<div class="req-song">' + esc(r.song) + '</div>' +
           '<div class="req-artist">' + esc(r.artist || '—') + '</div>' +
           '<div class="req-meta">' + meta + '</div>' +
+          statusPill(r.status) +
         '</div>' +
-        '<div class="req-actions">' + playBtn + doneBtn +
-        '<div class="icon-btn del" onclick="delReq(' + r.id + ')">✕</div></div></div>';
+        '<div class="req-actions">' + actions + '</div></div>';
     }).join('');
   }
 
+  async function approveReq(id) {
+    await sb.from('requests').update({ status: 'approved' }).eq('id', id);
+    var r = requests.find(r => r.id === id);
+    if (r) r.status = 'approved';
+    renderBoard(); renderDisplay();
+    showToast('✅ Request approved — added to display queue');
+  }
+
   async function markPlaying(id) {
-    await sb.from('requests').update({ status: 'pending' }).eq('status', 'playing');
+    // Demote any currently playing back to approved
+    await sb.from('requests').update({ status: 'approved' }).eq('status', 'playing');
     await sb.from('requests').update({ status: 'playing' }).eq('id', id);
-    requests.forEach(r => { if (r.status === 'playing') r.status = 'pending'; });
-    var r = requests.find(r => r.id === id); if (r) r.status = 'playing';
+    requests.forEach(r => { if (r.status === 'playing') r.status = 'approved'; });
+    var r = requests.find(r => r.id === id);
+    if (r) r.status = 'playing';
     renderBoard(); renderDisplay();
   }
 
   async function markPlayed(id) {
     await sb.from('requests').update({ status: 'played' }).eq('id', id);
-    var r = requests.find(r => r.id === id); if (r) r.status = 'played';
+    var r = requests.find(r => r.id === id);
+    if (r) r.status = 'played';
     renderBoard(); renderDisplay();
   }
 
   async function delReq(id) {
     await sb.from('requests').update({ status: 'deleted' }).eq('id', id);
-    var r = requests.find(r => r.id === id); if (r) r.status = 'deleted';
+    var r = requests.find(r => r.id === id);
+    if (r) r.status = 'deleted';
     renderBoard(); renderDisplay();
   }
 
@@ -331,20 +388,35 @@
 
   function renderDisplay() {
     var playing = requests.find(r => r.status === 'playing');
-    var queue = requests.filter(r => r.status === 'pending');
-    var s = document.getElementById('dp-song'), a = document.getElementById('dp-artist'), tp = document.getElementById('dp-type'), e = document.getElementById('dp-empty');
+    // Only approved + playing show on display
+    var queue = requests.filter(r => r.status === 'approved');
+    var s = document.getElementById('dp-song');
+    var a = document.getElementById('dp-artist');
+    var tp = document.getElementById('dp-type');
+    var e = document.getElementById('dp-empty');
+
     if (playing) {
       s.textContent = playing.song;
       a.textContent = playing.artist || '';
       tp.textContent = playing.type === 'karaoke' ? '🎤 Karaoke' + (playing.performer ? ' · ' + playing.performer : '') : '🎵 Song Request';
       tp.className = 'np-type ' + (playing.type || 'music');
-      s.style.display = 'block'; a.style.display = playing.artist ? 'block' : 'none'; tp.style.display = 'block'; e.style.display = 'none';
+      s.style.display = 'block';
+      a.style.display = playing.artist ? 'block' : 'none';
+      tp.style.display = 'block';
+      e.style.display = 'none';
     } else {
-      s.style.display = 'none'; a.style.display = 'none'; tp.style.display = 'none'; e.style.display = 'block';
+      s.style.display = 'none';
+      a.style.display = 'none';
+      tp.style.display = 'none';
+      e.style.display = 'block';
     }
+
     var ql = document.getElementById('queue-list');
-    if (!queue.length) { ql.innerHTML = '<div style="font-size:.8rem;color:#2e2c44;font-style:italic">Queue is empty</div>'; return; }
-    ql.innerHTML = queue.slice(0,6).map(function(r,i){
+    if (!queue.length) {
+      ql.innerHTML = '<div style="font-size:.8rem;color:#2e2c44;font-style:italic">No approved requests yet</div>';
+      return;
+    }
+    ql.innerHTML = queue.slice(0,6).map(function(r, i) {
       var sub = (r.artist || '') + (r.fan_name ? ' · from ' + r.fan_name : '');
       if (r.type === 'karaoke' && r.performer) sub = 'Performer: ' + r.performer;
       return '<div class="q-item"><div class="q-num">'+(i+1)+'</div>' +
@@ -356,20 +428,20 @@
   function openFullscreen() {
     var v = getV();
     var playing = requests.find(r => r.status === 'playing');
-    var queue = requests.filter(r => r.status === 'pending');
+    var queue = requests.filter(r => r.status === 'approved');
     var nowHtml = playing
       ? '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:5vw;letter-spacing:3px;color:#fff;line-height:1.1">'+esc(playing.song)+'</div>'
         +(playing.artist?'<div style="font-size:2vw;color:#a78be8;margin-top:.4rem">'+esc(playing.artist)+'</div>':'')
         +'<div style="font-size:1.1vw;letter-spacing:2px;text-transform:uppercase;color:'+(playing.type==='karaoke'?'#f472b6':'#6c3fc5')+';margin-top:.5rem">'+(playing.type==='karaoke'?'🎤 Karaoke'+(playing.performer?' · '+esc(playing.performer):''):'🎵 Song Request')+'</div>'
       : '<div style="font-size:2vw;color:#2e2c44;font-style:italic">Nothing playing yet</div>';
     var qHtml = queue.slice(0,6).map(function(r,i){
-      var sub = (r.artist?esc(r.artist)+' · ':'') + (r.type==='karaoke'&&r.performer?'Performer: '+esc(r.performer):'from '+(r.fan_name||'Anonymous'));
+      var sub = (r.artist?esc(r.artist)+' · ':'')+(r.type==='karaoke'&&r.performer?'Performer: '+esc(r.performer):'from '+(r.fan_name||'Anonymous'));
       return '<div style="display:flex;gap:1rem;align-items:center;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:8px;padding:.75rem 1.25rem;margin-bottom:.5rem">'
         +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;color:#2a2840;min-width:24px">'+(i+1)+'</div>'
         +'<div style="flex:1;min-width:0"><div style="font-size:1.1rem;font-weight:500;color:#d0ceea">'+esc(r.song)+'</div>'
         +'<div style="font-size:.82rem;color:#3a3850;margin-top:2px">'+sub+'</div></div>'
         +'<div style="font-size:1.1rem">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
-    }).join('') || '<div style="font-size:1rem;color:#2e2c44;font-style:italic;padding:.5rem 0">Queue is empty</div>';
+    }).join('') || '<div style="font-size:1rem;color:#2e2c44;font-style:italic;padding:.5rem 0">No approved requests yet</div>';
     var w = window.open('','_blank','menubar=no,toolbar=no,location=no,status=no');
     w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#06060f;color:#f0eef8;font-family:DM Sans,sans-serif;min-height:100vh;padding:4vw}</style></head><body>'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3vw">'
@@ -382,14 +454,13 @@
     w.document.close();
   }
 
-  // Realtime
   function initRealtime() {
     sb.channel('requests-rt')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, function(payload) {
         if (payload.eventType === 'INSERT') {
           requests.unshift(payload.new);
           var icon = payload.new.type === 'karaoke' ? '🎤' : '🎵';
-          showToast(icon + ' New ' + (payload.new.type || 'song') + ' request: ' + payload.new.song);
+          showToast(icon + ' New request: ' + payload.new.song + ' — awaiting approval');
         } else if (payload.eventType === 'UPDATE') {
           var idx = requests.findIndex(r => r.id === payload.new.id);
           if (idx >= 0) requests[idx] = payload.new; else requests.unshift(payload.new);
@@ -409,22 +480,13 @@
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function showToast(msg) {
     var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
-    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+    setTimeout(function(){ t.classList.remove('show'); }, 3500);
   }
-
-  // Also need to update the SQL table - add type and performer columns
-  // Run this in Supabase SQL editor if not done:
-  // alter table requests add column if not exists type text default 'music';
-  // alter table requests add column if not exists performer text;
 
   sync();
   loadRequests();
   initRealtime();
-
-  // Auto-refresh requests every 60 seconds
-  setInterval(function() {
-    loadRequests();
-  }, 60000);
+  setInterval(loadRequests, 60000);
 </script>
 </body>
 </html>
