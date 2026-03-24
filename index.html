@@ -2,485 +2,462 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DJ Request</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Song Request</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body { font-family: 'DM Sans', sans-serif; background: #0a0a0f; color: #f0eef8; min-height: 100vh; }
+  html { height: 100%; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #080810;
+    color: #f0eef8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-  .nav { display: flex; border-bottom: 1px solid #1e1e2e; background: #0a0a0f; position: sticky; top: 0; z-index: 10; }
-  .nav-tab { flex: 1; padding: .85rem .25rem; text-align: center; font-size: .65rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: #44425a; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s; }
-  .nav-tab.active { color: #a78be8; border-bottom-color: #6c3fc5; }
+  /* BACKGROUND GLOW */
+  .bg-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-glow::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(108,63,197,.2) 0%, transparent 65%);
+  }
+  .bg-glow::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(236,72,153,.1) 0%, transparent 65%);
+  }
 
-  .hero { padding: 2.5rem 2rem 2rem; text-align: center; border-bottom: 1px solid #1e1e2e; position: relative; overflow: hidden; }
-  .hero::before { content: ''; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 340px; height: 340px; background: radial-gradient(circle, rgba(108,63,197,.15) 0%, transparent 70%); pointer-events: none; }
-  .vinyl { width: 56px; height: 56px; background: #1a1a2e; border-radius: 50%; border: 3px solid #6c3fc5; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
-  .vinyl::after { content: ''; width: 15px; height: 15px; background: #6c3fc5; border-radius: 50%; }
-  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; letter-spacing: 4px; color: #fff; line-height: 1; }
-  .hero p { font-size: .75rem; color: #5c5a75; letter-spacing: 1.5px; text-transform: uppercase; margin-top: .4rem; }
+  .page { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
 
-  .panel { display: none; padding: 2rem; max-width: 520px; margin: 0 auto; }
-  .panel.active { display: block; }
+  /* SCREENS */
+  .screen { display: none; flex: 1; flex-direction: column; padding: 2rem 1.5rem; max-width: 480px; margin: 0 auto; width: 100%; }
+  .screen.active { display: flex; }
 
-  .label { font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; color: #44425a; margin-bottom: .6rem; }
-  .field { margin-bottom: 1.4rem; }
-  input[type=text], input[type=tel] { width: 100%; background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .75rem 1rem; color: #f0eef8; font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none; transition: border-color .2s; }
+  /* LANDING */
+  .landing-top {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem 0;
+  }
+
+  .event-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(108,63,197,.15);
+    border: 1px solid rgba(108,63,197,.35);
+    border-radius: 100px;
+    padding: .35rem 1rem;
+    font-size: .72rem;
+    color: #a78be8;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .event-chip-dot { width: 5px; height: 5px; border-radius: 50%; background: #a78be8; animation: blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .dj-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 12vw, 5rem);
+    letter-spacing: 4px;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: .5rem;
+  }
+
+  .event-name {
+    font-size: .85rem;
+    color: #5c5a75;
+    letter-spacing: 1px;
+    margin-bottom: 2.5rem;
+  }
+
+  .landing-prompt {
+    font-size: 1.1rem;
+    color: #c4c0e0;
+    margin-bottom: 2rem;
+    font-weight: 300;
+  }
+
+  /* TYPE CARDS */
+  .type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+
+  .type-card {
+    background: #12121c;
+    border: 1.5px solid #2a2840;
+    border-radius: 16px;
+    padding: 1.75rem 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color .25s, background .25s, transform .15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .type-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity .25s;
+    border-radius: 14px;
+  }
+
+  .type-card.music::before { background: radial-gradient(circle at 50% 0%, rgba(108,63,197,.2), transparent 70%); }
+  .type-card.karaoke::before { background: radial-gradient(circle at 50% 0%, rgba(236,72,153,.2), transparent 70%); }
+
+  .type-card:hover::before, .type-card:active::before { opacity: 1; }
+  .type-card:hover { transform: translateY(-2px); }
+  .type-card:active { transform: scale(.97); }
+
+  .type-card.music:hover { border-color: #6c3fc5; }
+  .type-card.karaoke:hover { border-color: #ec4899; }
+
+  .type-emoji { font-size: 2.4rem; margin-bottom: .75rem; display: block; }
+  .type-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: .3rem;
+  }
+  .type-card.music .type-label { color: #a78be8; }
+  .type-card.karaoke .type-label { color: #f472b6; }
+  .type-sub { font-size: .72rem; color: #4a4860; }
+
+  /* FORM SCREEN */
+  .form-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #1e1e2e;
+  }
+
+  .back-btn {
+    width: 36px; height: 36px;
+    background: #12121c;
+    border: 1px solid #2a2840;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #6b6880;
+    flex-shrink: 0;
+    transition: border-color .2s;
+  }
+  .back-btn:hover { border-color: #6c3fc5; color: #a78be8; }
+
+  .form-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    border-radius: 100px;
+    padding: .35rem 1rem;
+    font-size: .75rem;
+    font-weight: 500;
+    letter-spacing: .5px;
+  }
+  .form-type-badge.music { background: rgba(108,63,197,.15); color: #a78be8; border: 1px solid rgba(108,63,197,.3); }
+  .form-type-badge.karaoke { background: rgba(236,72,153,.15); color: #f472b6; border: 1px solid rgba(236,72,153,.3); }
+
+  .field { margin-bottom: 1.25rem; }
+  .field-label { font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; color: #44425a; margin-bottom: .5rem; }
+
+  input[type=text] {
+    width: 100%;
+    background: #12121c;
+    border: 1px solid #2a2840;
+    border-radius: 10px;
+    padding: .85rem 1rem;
+    color: #f0eef8;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
   input:focus { border-color: #6c3fc5; }
   input::placeholder { color: #34324a; }
+  input.karaoke-focus:focus { border-color: #ec4899; }
 
-  .btn { width: 100%; padding: .9rem; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: 2px; cursor: pointer; transition: background .2s, transform .1s; }
-  .btn:active { transform: scale(.98); }
-  .btn-purple { background: #6c3fc5; color: #fff; }
-  .btn-purple:hover { background: #7d52d4; }
-  .btn-purple:disabled { background: #3a2a60; color: #6b6880; cursor: not-allowed; }
-  .btn-outline { background: transparent; border: 1px solid #2a2840; color: #a78be8; font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 500; margin-top: .75rem; }
-  .btn-outline:hover { border-color: #6c3fc5; background: #12121c; }
-  .btn-sm { width: auto; padding: .35rem .85rem; font-size: .75rem; font-family: 'DM Sans', sans-serif; font-weight: 500; letter-spacing: .5px; border-radius: 6px; }
+  .optional-tag {
+    display: inline-block;
+    font-size: .62rem;
+    color: #3a3850;
+    background: #1a1828;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
 
-  .method-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.4rem; }
-  .method-card { background: #12121c; border: 1px solid #2a2840; border-radius: 10px; padding: 1rem .5rem; cursor: pointer; text-align: center; transition: border-color .2s; }
-  .method-card.sel { border-color: #6c3fc5; background: #16122a; }
-  .method-icon { font-size: 1.6rem; margin-bottom: .35rem; }
-  .method-lbl { font-size: .75rem; font-weight: 500; color: #a78be8; letter-spacing: .5px; }
+  .submit-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    margin-top: .5rem;
+  }
+  .submit-btn:active { transform: scale(.98); }
+  .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .submit-btn.music { background: linear-gradient(135deg, #6c3fc5, #8b5cf6); color: #fff; }
+  .submit-btn.karaoke { background: linear-gradient(135deg, #be185d, #ec4899); color: #fff; }
 
-  .qr-wrap { background: #fff; border-radius: 12px; padding: 1rem; width: fit-content; margin: 0 auto 1.25rem; }
+  /* SUCCESS */
+  .success-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
 
-  .link-row { background: #12121c; border: 1px solid #2a2840; border-radius: 10px; padding: .9rem 1.1rem; display: flex; align-items: center; gap: .85rem; margin-bottom: .65rem; cursor: pointer; transition: border-color .2s; }
-  .link-row:hover { border-color: #6c3fc5; }
-  .link-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
-  .wa-c { background: rgba(18,140,126,.15); color: #25d366; }
-  .sms-c { background: rgba(30,77,140,.15); color: #60a5fa; }
-  .web-c { background: rgba(108,63,197,.15); color: #a78be8; }
-  .link-title { font-size: .88rem; font-weight: 500; color: #f0eef8; }
-  .link-sub { font-size: .73rem; color: #44425a; margin-top: 2px; }
+  .success-icon {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    animation: popIn .4s cubic-bezier(.175,.885,.32,1.275);
+  }
+  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .success-icon.music { background: rgba(108,63,197,.2); border: 2px solid rgba(108,63,197,.4); }
+  .success-icon.karaoke { background: rgba(236,72,153,.2); border: 2px solid rgba(236,72,153,.4); }
 
-  .divider { height: 1px; background: #1e1e2e; margin: 1.5rem 0; }
+  .success-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 3px;
+    color: #fff;
+    margin-bottom: .5rem;
+  }
+  .success-song { font-size: 1.1rem; font-weight: 500; color: #c4c0e0; margin-bottom: .25rem; }
+  .success-artist { font-size: .85rem; color: #5c5a75; margin-bottom: 2rem; }
+  .success-msg { font-size: .85rem; color: #44425a; margin-bottom: 2rem; }
 
-  /* LIVE BADGE */
-  .live-badge { display: inline-flex; align-items: center; gap: 6px; background: #0d2e1a; border: 1px solid rgba(34,197,94,.3); border-radius: 100px; padding: .28rem .85rem; font-size: .7rem; color: #22c55e; }
-  .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .another-btn {
+    background: #12121c;
+    border: 1px solid #2a2840;
+    border-radius: 10px;
+    color: #a78be8;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    font-weight: 500;
+    padding: .75rem 1.75rem;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .another-btn:hover { border-color: #6c3fc5; }
 
-  /* BOARD */
-  .board-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: .5rem; }
-  .board-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; letter-spacing: 2px; color: #fff; }
-  .badge { display: inline-flex; align-items: center; gap: 5px; background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .28rem .75rem; font-size: .7rem; color: #5c5a75; }
-  .req-list { display: flex; flex-direction: column; gap: .75rem; }
-  .req-card { background: #12121c; border: 1px solid #2a2840; border-radius: 12px; padding: 1rem 1.1rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color .25s, opacity .25s; animation: slideIn .35s ease; }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-  .req-card.playing { border-color: #6c3fc5; background: #16122a; }
-  .req-card.played { opacity: .4; }
-  .req-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: #2e2c44; min-width: 28px; padding-top: 1px; }
-  .req-info { flex: 1; min-width: 0; }
-  .req-song { font-weight: 500; font-size: .95rem; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .req-artist { font-size: .78rem; color: #6b6880; margin-top: 2px; }
-  .req-from { font-size: .7rem; color: #3a3850; margin-top: 4px; }
-  .req-actions { display: flex; gap: .4rem; flex-shrink: 0; }
-  .icon-btn { background: #1a1830; border: 1px solid #2a2840; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .85rem; transition: background .2s, border-color .2s, color .2s; color: #9997b0; }
-  .icon-btn.play:hover { background: #16122a; border-color: #6c3fc5; color: #a78be8; }
-  .icon-btn.done:hover { background: #0d2e1a; border-color: #22c55e; color: #22c55e; }
-  .icon-btn.del:hover { background: #2e0d0d; border-color: #e24b4a; color: #e24b4a; }
-  .empty-state { text-align: center; padding: 3.5rem 1rem; color: #2e2c44; }
-  .empty-icon { font-size: 2.8rem; margin-bottom: .75rem; opacity: .5; }
-  .empty-txt { font-size: .85rem; }
+  .error-bar {
+    background: rgba(226,75,74,.1);
+    border: 1px solid rgba(226,75,74,.3);
+    border-radius: 8px;
+    padding: .7rem 1rem;
+    font-size: .82rem;
+    color: #f87171;
+    margin-top: .75rem;
+    display: none;
+  }
 
-  /* FAN FORM */
-  .fan-form { background: #12121c; border: 1px solid #2a2840; border-radius: 14px; padding: 1.75rem 1.5rem; margin-bottom: 1rem; }
-  .fan-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: #fff; margin-bottom: .25rem; }
-  .fan-sub { font-size: .8rem; color: #5c5a75; margin-bottom: 1.5rem; }
-  .success-msg { background: #0d2e1a; border: 1px solid rgba(34,197,94,.3); border-radius: 10px; padding: 1rem; text-align: center; font-size: .88rem; color: #22c55e; display: none; }
-  .error-msg { background: #2e0d0d; border: 1px solid rgba(226,75,74,.3); border-radius: 10px; padding: 1rem; text-align: center; font-size: .88rem; color: #e24b4a; display: none; margin-top: .75rem; }
-
-  /* DISPLAY */
-  .display-screen { background: #06060f; border: 1px solid #1e1e2e; border-radius: 16px; padding: 2rem; min-height: 400px; }
-  .display-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
-  .np-label { font-size: .65rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .5rem; }
-  .np-song { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 2px; color: #fff; line-height: 1.1; }
-  .np-artist { font-size: .95rem; color: #a78be8; margin-top: .3rem; }
-  .np-empty { font-size: .9rem; color: #2e2c44; font-style: italic; }
-  .queue-label { font-size: .65rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .85rem; }
-  .q-item { display: flex; align-items: center; gap: .85rem; background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 8px; padding: .65rem 1rem; margin-bottom: .5rem; }
-  .q-num { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: #2a2840; min-width: 20px; }
-  .q-song { font-size: .85rem; font-weight: 500; color: #d0ceea; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .q-artist { font-size: .72rem; color: #3a3850; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .display-hint { font-size: .7rem; color: #2a2840; text-align: center; margin-top: .85rem; letter-spacing: .5px; }
-  .fullscreen-btn { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; color: #6b6880; font-family: 'DM Sans', sans-serif; font-size: .78rem; padding: .5rem 1rem; cursor: pointer; transition: border-color .2s; }
-  .fullscreen-btn:hover { border-color: #6c3fc5; color: #a78be8; }
-
-  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1830; border: 1px solid #2a2840; border-radius: 8px; padding: .6rem 1.25rem; font-size: .82rem; color: #a78be8; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
-  .toast.show { opacity: 1; }
+  .footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: .65rem;
+    color: #2a2840;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
 </style>
 </head>
 <body>
+<div class="bg-glow"></div>
+<div class="page">
 
-<div class="hero">
-  <div class="vinyl"></div>
-  <h1>DJ Request</h1>
-  <p id="hero-sub">Song request manager</p>
-</div>
-
-<nav class="nav">
-  <button class="nav-tab active" onclick="go('setup')">Setup</button>
-  <button class="nav-tab" onclick="go('share')">Share</button>
-  <button class="nav-tab" onclick="go('fan')">Fan View</button>
-  <button class="nav-tab" onclick="go('board')">Requests</button>
-  <button class="nav-tab" onclick="go('display')">Display</button>
-</nav>
-
-<!-- SETUP -->
-<div id="tab-setup" class="panel active">
-  <div class="field"><div class="label">Your DJ name</div><input type="text" id="dj-name" placeholder="e.g. DJ Nova" oninput="sync()"></div>
-  <div class="field"><div class="label">Your phone number (for WhatsApp / SMS)</div><input type="tel" id="dj-phone" placeholder="+44 7700 900000" oninput="sync()"></div>
-  <div class="field"><div class="label">Event / venue name</div><input type="text" id="dj-event" placeholder="Saturday Night at The Arch" oninput="sync()"></div>
-  <div class="divider"></div>
-  <div class="label">Preferred request method for QR code</div>
-  <div class="method-row">
-    <div class="method-card" id="mw" onclick="setMethod('whatsapp')"><div class="method-icon">💬</div><div class="method-lbl">WhatsApp</div></div>
-    <div class="method-card sel" id="ms" onclick="setMethod('sms')"><div class="method-icon">✉️</div><div class="method-lbl">SMS / Text</div></div>
-    <div class="method-card" id="mf" onclick="setMethod('form')" style="grid-column:1/-1"><div class="method-icon">🌐</div><div class="method-lbl">Web Form (live sync)</div></div>
-  </div>
-  <button class="btn btn-purple" onclick="go('share')">Next: Share →</button>
-</div>
-
-<!-- SHARE -->
-<div id="tab-share" class="panel">
-  <div style="display:flex;justify-content:center;margin-bottom:.75rem">
-    <div class="live-badge"><div class="dot-live"></div> Live sync active</div>
-  </div>
-  <div class="label" style="text-align:center;margin-bottom:.75rem">QR code — fans scan to send a request</div>
-  <div class="qr-wrap"><div id="qr-box"></div></div>
-  <div style="text-align:center;font-size:.68rem;color:#3a3850;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.5rem">Scan to request a song</div>
-  <div class="label">Direct links</div>
-  <div class="link-row" onclick="openLink('whatsapp')">
-    <div class="link-icon wa-c">💬</div>
-    <div><div class="link-title">WhatsApp</div><div class="link-sub" id="wa-sub">Add phone number first</div></div>
-  </div>
-  <div class="link-row" onclick="openLink('sms')">
-    <div class="link-icon sms-c">✉️</div>
-    <div><div class="link-title">SMS / Text message</div><div class="link-sub" id="sms-sub">Add phone number first</div></div>
-  </div>
-  <div class="link-row" onclick="copyFormLink()">
-    <div class="link-icon web-c">🌐</div>
-    <div><div class="link-title">Web form link (live sync)</div><div class="link-sub" id="form-sub">Copy fan request link</div></div>
-  </div>
-  <button class="btn btn-outline" onclick="copyFormLink()">Copy fan request link</button>
-</div>
-
-<!-- FAN VIEW -->
-<div id="tab-fan" class="panel">
-  <div class="fan-form">
-    <div class="fan-title" id="fan-dj">DJ Nova</div>
-    <div class="fan-sub" id="fan-event-sub">Drop your song request below!</div>
-    <div class="field"><div class="label">Song name *</div><input type="text" id="fan-song" placeholder="e.g. Blinding Lights"></div>
-    <div class="field"><div class="label">Artist</div><input type="text" id="fan-artist" placeholder="e.g. The Weeknd"></div>
-    <div class="field"><div class="label">Your name (optional)</div><input type="text" id="fan-name" placeholder="e.g. Sarah"></div>
-    <button class="btn btn-purple" id="submit-btn" onclick="submitReq()">Send Request 🎵</button>
-    <div class="error-msg" id="err-msg">Something went wrong. Please try again.</div>
-  </div>
-  <div class="success-msg" id="succ">🎉 Request sent! The DJ has your song.</div>
-</div>
-
-<!-- REQUESTS BOARD -->
-<div id="tab-board" class="panel">
-  <div class="board-header">
-    <div class="board-title">Requests</div>
-    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-      <div class="live-badge"><div class="dot-live"></div><span id="req-count">0</span></div>
-      <button class="btn btn-outline btn-sm" onclick="clearPlayed()">Clear played</button>
-    </div>
-  </div>
-  <div class="req-list" id="req-list">
-    <div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-txt">No requests yet — share your QR code!</div></div>
-  </div>
-</div>
-
-<!-- DISPLAY -->
-<div id="tab-display" class="panel">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
-    <div class="label" style="margin:0">DJ display screen</div>
-    <button class="fullscreen-btn" onclick="openFullscreen()">⛶ Fullscreen</button>
-  </div>
-  <div class="display-screen">
-    <div class="display-top">
-      <div>
-        <div class="np-label">Now playing</div>
-        <div id="dp-song" class="np-song" style="display:none"></div>
-        <div id="dp-artist" class="np-artist" style="display:none"></div>
-        <div id="dp-empty" class="np-empty">Nothing playing yet</div>
-      </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:#2e2c44" id="dp-name">—</div>
-        <div style="font-size:.7rem;color:#2e2c44;margin-top:2px" id="dp-event">—</div>
+  <!-- LANDING -->
+  <div class="screen active" id="screen-landing">
+    <div class="landing-top">
+      <div class="event-chip"><div class="event-chip-dot"></div><span id="l-event">Live Tonight</span></div>
+      <div class="dj-name" id="l-djname">DJ Nova</div>
+      <div class="event-name" id="l-venue"></div>
+      <p class="landing-prompt">What do you want to hear?</p>
+      <div class="type-grid">
+        <div class="type-card music" onclick="openForm('music')">
+          <span class="type-emoji">🎵</span>
+          <span class="type-label">Song</span>
+          <span class="type-sub">Request a track</span>
+        </div>
+        <div class="type-card karaoke" onclick="openForm('karaoke')">
+          <span class="type-emoji">🎤</span>
+          <span class="type-label">Karaoke</span>
+          <span class="type-sub">Grab the mic</span>
+        </div>
       </div>
     </div>
-    <div class="divider" style="margin:.85rem 0 1.1rem"></div>
-    <div class="queue-label">Up next</div>
-    <div id="queue-list"><div style="font-size:.82rem;color:#2e2c44;font-style:italic;padding:.5rem 0">Queue is empty</div></div>
   </div>
-  <div class="display-hint">Mark requests as "Playing" in the Requests tab to show them here</div>
+
+  <!-- SONG REQUEST FORM -->
+  <div class="screen" id="screen-form">
+    <div class="form-header">
+      <div class="back-btn" onclick="goBack()">←</div>
+      <div class="form-type-badge music" id="form-badge">🎵 Song Request</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Song name *</div>
+      <input type="text" id="f-song" placeholder="e.g. Blinding Lights" autocomplete="off">
+    </div>
+    <div class="field">
+      <div class="field-label">Artist <span class="optional-tag">optional</span></div>
+      <input type="text" id="f-artist" placeholder="e.g. The Weeknd" autocomplete="off">
+    </div>
+    <div class="field">
+      <div class="field-label">Your name <span class="optional-tag">optional</span></div>
+      <input type="text" id="f-name" placeholder="e.g. Sarah" autocomplete="off">
+    </div>
+    <div class="field" id="f-performer-wrap" style="display:none">
+      <div class="field-label">Performer name *</div>
+      <input type="text" id="f-performer" placeholder="Who's singing?" autocomplete="off">
+    </div>
+    <button class="submit-btn music" id="submit-btn" onclick="submitReq()">Send Request</button>
+    <div class="error-bar" id="err-bar">Something went wrong. Please try again.</div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="screen" id="screen-success">
+    <div class="success-screen">
+      <div class="success-icon music" id="succ-icon">🎵</div>
+      <div class="success-title">Request Sent!</div>
+      <div class="success-song" id="succ-song"></div>
+      <div class="success-artist" id="succ-artist"></div>
+      <div class="success-msg">The DJ has your request.<br>Get ready! 🎉</div>
+      <button class="another-btn" onclick="goHome()">Send another request</button>
+    </div>
+  </div>
+
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="footer">Powered by DJ Request</div>
 
 <script>
   var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  var method = 'form';
-  var requests = [];
-  var realtimeSub = null;
+  var currentType = 'music';
+  var params = new URLSearchParams(window.location.search);
+  var djName = params.get('dj') || 'DJ Nova';
+  var eventName = params.get('event') || 'Live Tonight';
+  var venue = params.get('venue') || '';
 
-  // Init realtime subscription
-  function initRealtime() {
-    realtimeSub = sb.channel('requests-channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, function(payload) {
-        if (payload.eventType === 'INSERT') {
-          requests.unshift(payload.new);
-          showToast('🎵 New request: ' + payload.new.song);
-        } else if (payload.eventType === 'UPDATE') {
-          var idx = requests.findIndex(r => r.id === payload.new.id);
-          if (idx >= 0) requests[idx] = payload.new;
-        } else if (payload.eventType === 'DELETE') {
-          requests = requests.filter(r => r.id !== payload.old.id);
-        }
-        renderBoard();
-        renderDisplay();
-      })
-      .subscribe();
+  // Set landing info
+  document.getElementById('l-djname').textContent = djName;
+  document.getElementById('l-event').textContent = eventName;
+  document.getElementById('l-venue').textContent = venue;
+  document.title = djName + ' · Song Request';
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
   }
 
-  // Load all requests on start
-  async function loadRequests() {
-    var res = await sb.from('requests').select('*').order('created_at', { ascending: false });
-    if (res.data) { requests = res.data; renderBoard(); renderDisplay(); }
+  function openForm(type) {
+    currentType = type;
+    var isKaraoke = type === 'karaoke';
+    var badge = document.getElementById('form-badge');
+    badge.textContent = isKaraoke ? '🎤 Karaoke Request' : '🎵 Song Request';
+    badge.className = 'form-type-badge ' + type;
+    document.getElementById('f-performer-wrap').style.display = isKaraoke ? 'block' : 'none';
+    var inputs = document.querySelectorAll('#screen-form input');
+    inputs.forEach(function(inp) {
+      inp.className = isKaraoke ? 'karaoke-focus' : '';
+    });
+    var btn = document.getElementById('submit-btn');
+    btn.className = 'submit-btn ' + type;
+    btn.textContent = isKaraoke ? 'Submit Karaoke Request' : 'Send Song Request';
+    document.getElementById('succ-icon').className = 'success-icon ' + type;
+    document.getElementById('succ-icon').textContent = isKaraoke ? '🎤' : '🎵';
+    document.getElementById('f-song').value = '';
+    document.getElementById('f-artist').value = '';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-performer').value = '';
+    document.getElementById('err-bar').style.display = 'none';
+    show('screen-form');
+    setTimeout(function(){ document.getElementById('f-song').focus(); }, 300);
   }
 
-  function go(tab) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + tab).classList.add('active');
-    var tabs = document.querySelectorAll('.nav-tab');
-    ['setup','share','fan','board','display'].forEach(function(n,i){ if(n===tab) tabs[i].classList.add('active'); });
-    if (tab === 'share') genQR();
-    if (tab === 'display') renderDisplay();
-  }
-
-  function getV() {
-    return {
-      name: document.getElementById('dj-name').value.trim() || 'Your DJ',
-      phone: document.getElementById('dj-phone').value.trim().replace(/\s/g,''),
-      event: document.getElementById('dj-event').value.trim() || "Tonight's event"
-    };
-  }
-
-  function setMethod(m) {
-    method = m;
-    document.getElementById('mw').classList.toggle('sel', m === 'whatsapp');
-    document.getElementById('ms').classList.toggle('sel', m === 'sms');
-    document.getElementById('mf').classList.toggle('sel', m === 'form');
-  }
-
-  function sync() {
-    var v = getV();
-    document.getElementById('hero-sub').textContent = v.event;
-    document.getElementById('fan-dj').textContent = v.name;
-    document.getElementById('fan-event-sub').textContent = v.event + ' — drop your request below!';
-    document.getElementById('wa-sub').textContent = v.phone ? 'wa.me/' + v.phone.replace('+','') : 'Add phone number first';
-    document.getElementById('sms-sub').textContent = v.phone ? 'Text to ' + v.phone : 'Add phone number first';
-    document.getElementById('dp-name').textContent = v.name;
-    document.getElementById('dp-event').textContent = v.event;
-    var formUrl = window.location.href.split('?')[0] + '?view=fan&dj=' + encodeURIComponent(v.name) + '&event=' + encodeURIComponent(v.event);
-    document.getElementById('form-sub').textContent = formUrl.length > 50 ? formUrl.substring(0,50)+'...' : formUrl;
-  }
-
-  function buildMsg(v) { return encodeURIComponent('🎵 Hey ' + v.name + '! Can you play [SONG] by [ARTIST]? — [Your name]'); }
-  function waURL(v) { return v.phone ? 'https://wa.me/' + v.phone.replace('+','') + '?text=' + buildMsg(v) : null; }
-  function smsURL(v) {
-    if (!v.phone) return null;
-    var sep = /iPhone|iPad|iPod/.test(navigator.userAgent) ? '&' : '?';
-    return 'sms:' + v.phone + sep + 'body=' + buildMsg(v);
-  }
-  function formURL() {
-    var v = getV();
-    return window.location.href.split('?')[0] + '?view=fan&dj=' + encodeURIComponent(v.name) + '&event=' + encodeURIComponent(v.event);
-  }
-
-  function openLink(type) {
-    var v = getV();
-    var url = type === 'whatsapp' ? waURL(v) : smsURL(v);
-    if (!url) { alert('Please enter your phone number in Setup first.'); return; }
-    window.open(url, '_blank');
-  }
-
-  function copyFormLink() {
-    navigator.clipboard.writeText(formURL()).then(function(){ showToast('Fan link copied!'); });
-  }
-
-  var qrDone = false;
-  function genQR() {
-    var box = document.getElementById('qr-box');
-    var url = method === 'whatsapp' ? waURL(getV()) : method === 'sms' ? smsURL(getV()) : formURL();
-    box.innerHTML = '';
-    qrDone = false;
-    if (!url) {
-      box.style.cssText = 'width:200px;height:200px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#888;text-align:center';
-      box.textContent = 'Enter phone number to generate QR'; return;
-    }
-    box.style.cssText = '';
-    try {
-      new QRCode(box, { text: url, width: 200, height: 200, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M });
-      qrDone = true;
-    } catch(e) { box.textContent = 'QR generation failed'; }
-  }
+  function goBack() { show('screen-landing'); }
+  function goHome() { show('screen-landing'); }
 
   async function submitReq() {
-    var song = document.getElementById('fan-song').value.trim();
-    var artist = document.getElementById('fan-artist').value.trim();
-    var name = document.getElementById('fan-name').value.trim();
-    if (!song) { document.getElementById('fan-song').focus(); return; }
+    var song = document.getElementById('f-song').value.trim();
+    var artist = document.getElementById('f-artist').value.trim();
+    var name = document.getElementById('f-name').value.trim();
+    var performer = document.getElementById('f-performer').value.trim();
+    if (!song) { document.getElementById('f-song').focus(); return; }
+    if (currentType === 'karaoke' && !performer) { document.getElementById('f-performer').focus(); return; }
     var btn = document.getElementById('submit-btn');
-    btn.disabled = true; btn.textContent = 'Sending...';
-    document.getElementById('err-msg').style.display = 'none';
-    var res = await sb.from('requests').insert([{ song: song, artist: artist || null, fan_name: name || 'Anonymous', status: 'pending' }]);
-    btn.disabled = false; btn.textContent = 'Send Request 🎵';
-    if (res.error) { document.getElementById('err-msg').style.display = 'block'; return; }
-    document.getElementById('fan-song').value = '';
-    document.getElementById('fan-artist').value = '';
-    document.getElementById('fan-name').value = '';
-    var s = document.getElementById('succ');
-    s.style.display = 'block';
-    setTimeout(function(){ s.style.display = 'none'; }, 3000);
-  }
-
-  function renderBoard() {
-    var visible = requests.filter(r => r.status !== 'deleted');
-    document.getElementById('req-count').textContent = visible.length + ' request' + (visible.length !== 1 ? 's' : '');
-    var list = document.getElementById('req-list');
-    if (!visible.length) {
-      list.innerHTML = '<div class="empty-state"><div class="empty-icon">🎵</div><div class="empty-txt">No requests yet — share your QR code!</div></div>';
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    document.getElementById('err-bar').style.display = 'none';
+    var payload = {
+      song: song,
+      artist: artist || null,
+      fan_name: name || 'Anonymous',
+      status: 'pending',
+      type: currentType,
+      performer: currentType === 'karaoke' ? (performer || null) : null
+    };
+    var res = await sb.from('requests').insert([payload]);
+    btn.disabled = false;
+    btn.textContent = currentType === 'karaoke' ? 'Submit Karaoke Request' : 'Send Song Request';
+    if (res.error) {
+      document.getElementById('err-bar').style.display = 'block';
       return;
     }
-    list.innerHTML = visible.map(function(r, i) {
-      var cls = r.status === 'playing' ? ' playing' : r.status === 'played' ? ' played' : '';
-      var playBtn = r.status !== 'playing'
-        ? '<div class="icon-btn play" title="Mark as playing" onclick="markPlaying(' + r.id + ')">▶</div>'
-        : '<div class="icon-btn" style="color:#6c3fc5;border-color:#6c3fc5">♪</div>';
-      var doneBtn = r.status !== 'played'
-        ? '<div class="icon-btn done" title="Mark as played" onclick="markPlayed(' + r.id + ')">✓</div>' : '';
-      return '<div class="req-card' + cls + '">' +
-        '<div class="req-num">' + (i+1) + '</div>' +
-        '<div class="req-info"><div class="req-song">' + esc(r.song) + '</div>' +
-        '<div class="req-artist">' + esc(r.artist || '—') + '</div>' +
-        '<div class="req-from">from ' + esc(r.fan_name || 'Anonymous') + ' · ' + fmtTime(r.created_at) + '</div></div>' +
-        '<div class="req-actions">' + playBtn + doneBtn +
-        '<div class="icon-btn del" title="Remove" onclick="delReq(' + r.id + ')">✕</div></div></div>';
-    }).join('');
+    document.getElementById('succ-song').textContent = song;
+    document.getElementById('succ-artist').textContent = artist ? 'by ' + artist : (currentType === 'karaoke' && performer ? 'Performer: ' + performer : '');
+    show('screen-success');
   }
-
-  async function markPlaying(id) {
-    await sb.from('requests').update({ status: 'pending' }).eq('status', 'playing');
-    await sb.from('requests').update({ status: 'playing' }).eq('id', id);
-    requests.forEach(r => { if (r.status === 'playing') r.status = 'pending'; });
-    var r = requests.find(r => r.id === id); if (r) r.status = 'playing';
-    renderBoard(); renderDisplay();
-  }
-
-  async function markPlayed(id) {
-    await sb.from('requests').update({ status: 'played' }).eq('id', id);
-    var r = requests.find(r => r.id === id); if (r) r.status = 'played';
-    renderBoard(); renderDisplay();
-  }
-
-  async function delReq(id) {
-    await sb.from('requests').update({ status: 'deleted' }).eq('id', id);
-    var r = requests.find(r => r.id === id); if (r) r.status = 'deleted';
-    renderBoard(); renderDisplay();
-  }
-
-  async function clearPlayed() {
-    await sb.from('requests').update({ status: 'deleted' }).eq('status', 'played');
-    requests = requests.filter(r => r.status !== 'played' && r.status !== 'deleted');
-    renderBoard();
-  }
-
-  function renderDisplay() {
-    var playing = requests.find(r => r.status === 'playing');
-    var queue = requests.filter(r => r.status === 'pending');
-    var s = document.getElementById('dp-song'), a = document.getElementById('dp-artist'), e = document.getElementById('dp-empty');
-    if (playing) {
-      s.textContent = playing.song;
-      a.textContent = playing.artist || '';
-      s.style.display = 'block'; a.style.display = playing.artist ? 'block' : 'none'; e.style.display = 'none';
-    } else { s.style.display = 'none'; a.style.display = 'none'; e.style.display = 'block'; }
-    var ql = document.getElementById('queue-list');
-    if (!queue.length) { ql.innerHTML = '<div style="font-size:.82rem;color:#2e2c44;font-style:italic;padding:.5rem 0">Queue is empty</div>'; return; }
-    ql.innerHTML = queue.slice(0,6).map(function(r,i){
-      return '<div class="q-item"><div class="q-num">'+(i+1)+'</div><div style="min-width:0"><div class="q-song">'+esc(r.song)+'</div><div class="q-artist">'+esc(r.artist||'')+(r.fan_name?' · from '+esc(r.fan_name):'')+'</div></div></div>';
-    }).join('');
-  }
-
-  function openFullscreen() {
-    var v = getV();
-    var playing = requests.find(r => r.status === 'playing');
-    var queue = requests.filter(r => r.status === 'pending');
-    var nowHtml = playing
-      ? '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:5vw;letter-spacing:3px;color:#fff;line-height:1.1">'+esc(playing.song)+'</div>'
-        +(playing.artist?'<div style="font-size:2vw;color:#a78be8;margin-top:.5rem">'+esc(playing.artist)+'</div>':'')
-      : '<div style="font-size:2vw;color:#2e2c44;font-style:italic">Nothing playing yet</div>';
-    var qHtml = queue.slice(0,6).map(function(r,i){
-      return '<div style="display:flex;gap:1rem;align-items:center;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:8px;padding:.75rem 1.25rem;margin-bottom:.5rem">'
-        +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;color:#2a2840;min-width:24px">'+(i+1)+'</div>'
-        +'<div><div style="font-size:1.1rem;font-weight:500;color:#d0ceea">'+esc(r.song)+'</div>'
-        +'<div style="font-size:.85rem;color:#3a3850;margin-top:2px">'+(r.artist?esc(r.artist)+' · ':'')+' from '+esc(r.fan_name||'Anonymous')+'</div></div></div>';
-    }).join('') || '<div style="font-size:1rem;color:#2e2c44;font-style:italic;padding:.5rem 0">Queue is empty</div>';
-    var w = window.open('','_blank','menubar=no,toolbar=no,location=no,status=no');
-    w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#06060f;color:#f0eef8;font-family:DM Sans,sans-serif;min-height:100vh;padding:4vw}</style></head><body>'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3vw">'
-      +'<div><div style="font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:.6rem">Now playing</div>'+nowHtml+'</div>'
-      +'<div style="text-align:right"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:#2e2c44">'+esc(v.name)+'</div>'
-      +'<div style="font-size:.8rem;color:#2e2c44;margin-top:3px">'+esc(v.event)+'</div></div></div>'
-      +'<hr style="border:none;border-top:1px solid #1e1e2e;margin-bottom:2.5vw">'
-      +'<div style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:1rem">Up next</div>'+qHtml
-      +'</body></html>');
-    w.document.close();
-  }
-
-  function fmtTime(ts) {
-    if (!ts) return '';
-    return new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  }
-
-  function esc(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function showToast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(function(){ t.classList.remove('show'); }, 3000);
-  }
-
-  // Check if loaded as fan view via URL param
-  (function() {
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('view') === 'fan') {
-      var djName = params.get('dj') || 'Your DJ';
-      var event = params.get('event') || "Tonight's event";
-      document.getElementById('fan-dj').textContent = djName;
-      document.getElementById('fan-event-sub').textContent = event + ' — drop your request below!';
-      document.getElementById('hero-sub').textContent = event;
-      go('fan');
-    }
-  })();
-
-  sync();
-  loadRequests();
-  initRealtime();
 </script>
 </body>
 </html>
