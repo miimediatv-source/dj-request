@@ -449,6 +449,7 @@ async function searchAllApproved() {
     spotifyCache[r.id] === undefined
   );
   for (var r of toSearch) {
+    if (!spotifyToken) break; // stop if token was cleared mid-loop
     await searchAndCacheTrack(r);
   }
 }
@@ -728,7 +729,7 @@ async function loadRequests() {
     requests = res.data;
     renderBoard();
     renderDisplay();
-    searchAllApproved();
+    if (spotifyToken) searchAllApproved(); // only search if we have a valid token
   }
 }
 
@@ -739,12 +740,15 @@ function showToast(msg) {
   setTimeout(function(){ t.classList.remove('show'); }, 3500);
 }
 
-// Init
-checkSpotifyCallback();
-sync();
-loadRequests();
-initRealtime();
-setInterval(loadRequests, 60000);
+// Init — sequence matters: check spotify first, then load requests
+async function init() {
+  await checkSpotifyCallback(); // wait for token exchange to complete before anything else
+  sync();
+  await loadRequests();
+  initRealtime();
+  setInterval(loadRequests, 60000);
+}
+init();
 </script>
 </body>
 </html>
