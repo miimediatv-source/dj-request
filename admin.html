@@ -307,14 +307,26 @@ async function spotifyLogin() {
 function spotifyLogout() {
   spotifyToken = null;
   sessionStorage.removeItem('spotify_token');
+  sessionStorage.removeItem('spotify_expires');
   sessionStorage.removeItem('spotify_verifier');
+  spotifyCache = {};
   updateSpotifyUI();
   renderBoard();
 }
 
 async function checkSpotifyCallback() {
   var saved = sessionStorage.getItem('spotify_token');
-  if (saved) { spotifyToken = saved; updateSpotifyUI(); return; }
+  var expires = sessionStorage.getItem('spotify_expires');
+  if (saved && expires && Date.now() < parseInt(expires)) {
+    spotifyToken = saved;
+    updateSpotifyUI();
+    return;
+  } else if (saved) {
+    // Token exists but is expired — clear it
+    console.log('Spotify token expired, clearing');
+    sessionStorage.removeItem('spotify_token');
+    sessionStorage.removeItem('spotify_expires');
+  }
   var params = new URLSearchParams(window.location.search);
   var code = params.get('code');
   if (!code) return;
@@ -336,7 +348,9 @@ async function checkSpotifyCallback() {
     var data = await res.json();
     if (data.access_token) {
       spotifyToken = data.access_token;
+      var expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
       sessionStorage.setItem('spotify_token', spotifyToken);
+      sessionStorage.setItem('spotify_expires', expiresAt.toString());
       history.replaceState(null, '', window.location.pathname);
       updateSpotifyUI();
       showToast('✅ Spotify connected!');
@@ -359,7 +373,9 @@ function updateSpotifyUI() {
     bar.classList.add('connected');
     statusTxt.textContent = 'Spotify connected';
     statusTxt.className = 'spotify-status ok';
-    subTxt.textContent = 'Track search and queue active';
+    var expires = sessionStorage.getItem('spotify_expires');
+    var minsLeft = expires ? Math.round((parseInt(expires) - Date.now()) / 60000) : '?';
+    subTxt.textContent = 'Track search and queue active · ' + minsLeft + ' min remaining';
     btn.textContent = 'Disconnect';
     btn.className = 'spotify-btn disconnect';
     btn.onclick = spotifyLogout;
@@ -383,7 +399,12 @@ async function spotifySearch(query) {
       headers: { 'Authorization': 'Bearer ' + spotifyToken }
     });
     console.log('Spotify response status:', res.status);
-    if (res.status === 401) { console.warn('Spotify: token expired'); spotifyLogout(); return null; }
+    if (res.status === 401 || res.status === 403) {
+      console.warn('Spotify: token invalid/expired, clearing session');
+      spotifyLogout();
+      showToast('⚠️ Spotify session expired — please reconnect');
+      return null;
+    }
     var data = await res.json();
     console.log('Spotify result:', data.tracks ? data.tracks.items[0] : data);
     if (data.tracks && data.tracks.items.length > 0) return data.tracks.items[0];
