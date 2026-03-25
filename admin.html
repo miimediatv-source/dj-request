@@ -537,14 +537,15 @@ function spotifyTrackHTML(r) {
   var artistName = cached.artist || '';
   var sq = encodeURIComponent(trackName + ' ' + artistName);
   var spotifyUrl = 'https://open.spotify.com/search/' + sq;
-  var queueHtml = spotifyToken
-    ? '<button class="spotify-queue-btn" onclick="queueSpotifyTrack(' + r.id + ',' + JSON.stringify(trackName) + ',' + JSON.stringify(artistName) + ')">+ Queue</button>'
+  // Store song/artist as data attributes to avoid quote escaping issues in onclick
+  var queueBtn = spotifyToken
+    ? '<button class="spotify-queue-btn" data-rid="' + r.id + '" data-song="' + esc(trackName) + '" data-artist="' + esc(artistName) + '" onclick="queueFromBtn(this)">+ Queue</button>'
     : '';
+  var openBtn = '<button class="spotify-open-btn" data-url="' + spotifyUrl + '" onclick="window.open(this.dataset.url)">Spotify</button>';
   return '<div class="spotify-track">'
     + (art ? '<img class="spotify-art" src="' + art + '" alt="">' : '')
     + '<div class="spotify-track-info"><div class="spotify-track-name">' + esc(trackName) + '</div><div class="spotify-track-artist">' + esc(artistName) + '</div></div>'
-    + '<button class="spotify-open-btn" onclick="window.open('' + spotifyUrl + '','_blank')">Spotify</button>'
-    + queueHtml + '</div>';
+    + openBtn + queueBtn + '</div>';
 }
 
 function statusPill(status) {
@@ -613,6 +614,10 @@ async function queueTrack(uri, id) {
   else if (result === 'no_device' || result === 'forbidden') showToast('⚠️ Open Spotify and start playing first');
   else if (result === 'expired') showToast('⚠️ Spotify session expired — reconnect');
   else showToast('⚠️ Could not add to queue');
+}
+
+async function queueFromBtn(btn) {
+  queueSpotifyTrack(btn.dataset.rid, btn.dataset.song, btn.dataset.artist);
 }
 
 async function queueSpotifyTrack(reqId, song, artist) {
