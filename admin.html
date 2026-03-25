@@ -400,7 +400,7 @@ function updateSpotifyUI() {
     bar.classList.remove('connected');
     statusTxt.textContent = 'Not connected';
     statusTxt.className = 'spotify-status off';
-    subTxt.textContent = 'Connect to search tracks and auto-queue';
+    subTxt.textContent = 'Connect to enable Spotify quick-open links';
     btn.textContent = 'Connect Spotify';
     btn.className = 'spotify-btn';
     btn.onclick = spotifyLogin;
@@ -539,7 +539,7 @@ function spotifyTrackHTML(r) {
   var spotifyUrl = 'https://open.spotify.com/search/' + sq;
   // Store song/artist as data attributes to avoid quote escaping issues in onclick
   var queueBtn = spotifyToken
-    ? '<button class="spotify-queue-btn" data-rid="' + r.id + '" data-song="' + esc(trackName) + '" data-artist="' + esc(artistName) + '" onclick="queueFromBtn(this)">+ Queue</button>'
+    ? '<button class="spotify-queue-btn" data-rid="' + r.id + '" data-song="' + esc(trackName) + '" data-artist="' + esc(artistName) + '" onclick="queueFromBtn(this)">Open in Spotify</button>'
     : '';
   var openBtn = '<button class="spotify-open-btn" data-url="' + spotifyUrl + '" onclick="window.open(this.dataset.url)">Spotify</button>';
   return '<div class="spotify-track">'
@@ -597,9 +597,7 @@ async function approveReq(id) {
   if (r) {
     r.status = 'approved';
     if (r.type !== 'karaoke') {
-      searchAndCacheTrack(r).then(async function(track) {
-        if (track && spotifyToken) queueSpotifyTrack(r.id, track.name, track.artist);
-      });
+      searchAndCacheTrack(r); // search MusicBrainz for track info and cover art
     }
   }
   renderBoard(); renderDisplay();
@@ -622,21 +620,10 @@ async function queueFromBtn(btn) {
 
 async function queueSpotifyTrack(reqId, song, artist) {
   if (!spotifyToken) { showToast('⚠️ Connect Spotify first to queue tracks'); return; }
-  showToast('Finding on Spotify...');
-  try {
-    var q = encodeURIComponent(song + (artist ? ' ' + artist : ''));
-    var res = await fetch('https://api.spotify.com/v1/search?q=' + q + '&type=track&limit=1', {
-      headers: { 'Authorization': 'Bearer ' + spotifyToken }
-    });
-    if (res.status === 403) { showToast('⚠️ Spotify search unavailable for this app plan'); return; }
-    if (!res.ok) { showToast('⚠️ Spotify search failed'); return; }
-    var data = await res.json();
-    if (!data.tracks || !data.tracks.items.length) { showToast('⚠️ Track not found on Spotify'); return; }
-    var result = await spotifyAddToQueue(data.tracks.items[0].uri);
-    if (result === 'ok') showToast('🎵 Added to Spotify queue: ' + song);
-    else if (result === 'no_device' || result === 'forbidden') showToast('⚠️ Open Spotify and start playing first');
-    else showToast('⚠️ Could not queue — check Spotify is active');
-  } catch(e) { showToast('⚠️ Queue error: ' + e.message); }
+  // Spotify search is restricted for this app — open Spotify search instead
+  var sq = encodeURIComponent((song || '') + ' ' + (artist || ''));
+  window.open('https://open.spotify.com/search/' + sq, '_blank');
+  showToast('Opening Spotify — find the track and add it manually');
 }
 
 async function markPlaying(id) {
