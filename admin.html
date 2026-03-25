@@ -392,14 +392,19 @@ async function spotifySearch(query) {
 }
 
 async function spotifyAddToQueue(trackUri) {
-  if (!spotifyToken || !trackUri) return false;
+  if (!spotifyToken || !trackUri) return 'no_token';
   try {
     var res = await fetch('https://api.spotify.com/v1/me/player/queue?uri=' + encodeURIComponent(trackUri), {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + spotifyToken }
     });
-    return res.status === 204;
-  } catch(e) { return false; }
+    console.log('Queue response status:', res.status);
+    if (res.status === 204) return 'ok';
+    if (res.status === 403) return 'forbidden';
+    if (res.status === 404) return 'no_device';
+    if (res.status === 401) { spotifyLogout(); return 'expired'; }
+    return 'error';
+  } catch(e) { console.error('Queue error:', e); return 'error'; }
 }
 
 async function searchAndCacheTrack(r) {
@@ -553,10 +558,16 @@ async function approveReq(id) {
     if (spotifyToken && r.type !== 'karaoke') {
       searchAndCacheTrack(r).then(async function(track) {
         if (track) {
-          // Auto-add to queue
-          var ok = await spotifyAddToQueue(track.uri);
-          if (ok) showToast('🎵 Added to Spotify queue: ' + track.name);
-          else showToast('✅ Approved — open Spotify and play something first to enable queuing');
+          var result = await spotifyAddToQueue(track.uri);
+          if (result === 'ok') {
+            showToast('🎵 Queued on Spotify: ' + track.name);
+          } else if (result === 'no_device' || result === 'forbidden') {
+            showToast('⚠️ Open Spotify and start playing something first, then approve again');
+          } else if (result === 'expired') {
+            showToast('⚠️ Spotify session expired — reconnect in the Requests tab');
+          } else {
+            showToast('✅ Approved — Spotify track found but could not auto-queue');
+          }
         }
       });
     }
@@ -566,9 +577,17 @@ async function approveReq(id) {
 }
 
 async function queueTrack(uri, id) {
-  var ok = await spotifyAddToQueue(uri);
-  if (ok) showToast('🎵 Added to Spotify queue!');
-  else showToast('⚠️ Make sure Spotify is open and playing on a device');
+  showToast('Adding to queue...');
+  var result = await spotifyAddToQueue(uri);
+  if (result === 'ok') {
+    showToast('🎵 Added to Spotify queue!');
+  } else if (result === 'no_device' || result === 'forbidden') {
+    showToast('⚠️ Open Spotify on any device and start playing first');
+  } else if (result === 'expired') {
+    showToast('⚠️ Spotify session expired — click Connect Spotify again');
+  } else {
+    showToast('⚠️ Could not add to queue — check Spotify is active');
+  }
 }
 
 async function markPlaying(id) {
