@@ -275,42 +275,77 @@ var spotifyCache = {}; // cache track results per request id
 var FAN_URL_BASE = 'https://miimediatv-source.github.io/dj-request/index.html';
 
 // ── SPOTIFY AUTH ──────────────────────────────────────────────
-function spotifyLogin() {
+async function generateCodeVerifier() {
+  var array = new Uint8Array(64);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode.apply(null, array)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+async function generateCodeChallenge(verifier) {
+  var encoded = new TextEncoder().encode(verifier);
+  var digest = await crypto.subtle.digest('SHA-256', encoded);
+  return btoa(String.fromCharCode.apply(null, new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+async function spotifyLogin() {
+  var verifier = await generateCodeVerifier();
+  var challenge = await generateCodeChallenge(verifier);
   var state = Math.random().toString(36).substring(2);
+  sessionStorage.setItem('spotify_verifier', verifier);
   sessionStorage.setItem('spotify_state', state);
   var url = 'https://accounts.spotify.com/authorize'
     + '?client_id=' + SPOTIFY_CLIENT_ID
-    + '&response_type=token'
+    + '&response_type=code'
     + '&redirect_uri=' + encodeURIComponent(SPOTIFY_REDIRECT)
     + '&scope=' + encodeURIComponent(SPOTIFY_SCOPES)
     + '&state=' + state
-    + '&show_dialog=false';
+    + '&code_challenge_method=S256'
+    + '&code_challenge=' + challenge;
   window.location = url;
 }
 
 function spotifyLogout() {
   spotifyToken = null;
   sessionStorage.removeItem('spotify_token');
+  sessionStorage.removeItem('spotify_verifier');
   updateSpotifyUI();
   renderBoard();
 }
 
-function checkSpotifyCallback() {
-  var hash = window.location.hash.substring(1);
-  if (!hash) {
-    var saved = sessionStorage.getItem('spotify_token');
-    if (saved) { spotifyToken = saved; updateSpotifyUI(); }
-    return;
-  }
-  var params = {};
-  hash.split('&').forEach(function(p) { var kv = p.split('='); params[kv[0]] = decodeURIComponent(kv[1]); });
-  if (params.access_token) {
-    spotifyToken = params.access_token;
-    sessionStorage.setItem('spotify_token', spotifyToken);
-    history.replaceState(null, '', window.location.pathname);
-    updateSpotifyUI();
-    showToast('✅ Spotify connected!');
-    go('board');
+async function checkSpotifyCallback() {
+  var saved = sessionStorage.getItem('spotify_token');
+  if (saved) { spotifyToken = saved; updateSpotifyUI(); return; }
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get('code');
+  if (!code) return;
+  var verifier = sessionStorage.getItem('spotify_verifier');
+  if (!verifier) return;
+  try {
+    var body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: SPOTIFY_REDIRECT,
+      client_id: SPOTIFY_CLIENT_ID,
+      code_verifier: verifier
+    });
+    var res = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
+    });
+    var data = await res.json();
+    if (data.access_token) {
+      spotifyToken = data.access_token;
+      sessionStorage.setItem('spotify_token', spotifyToken);
+      history.replaceState(null, '', window.location.pathname);
+      updateSpotifyUI();
+      showToast('✅ Spotify connected!');
+      go('board');
+    } else {
+      showToast('⚠️ Spotify login failed: ' + (data.error_description || data.error));
+    }
+  } catch(e) {
+    showToast('⚠️ Spotify connection error');
   }
 }
 
