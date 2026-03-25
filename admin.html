@@ -22,7 +22,7 @@
   .hero h1 span { color: #a78be8; }
   .hero-sub { font-size: .7rem; color: #44425a; letter-spacing: 1.5px; text-transform: uppercase; margin-top: .3rem; }
 
-  .panel { display: none; padding: 1.75rem; max-width: 560px; margin: 0 auto; }
+  .panel { display: none; padding: 1.75rem; max-width: 580px; margin: 0 auto; }
   .panel.active { display: block; }
 
   .label { font-size: .66rem; letter-spacing: 2px; text-transform: uppercase; color: #44425a; margin-bottom: .55rem; }
@@ -35,6 +35,8 @@
   .btn:active { transform: scale(.98); }
   .btn-purple { background: #6c3fc5; color: #fff; }
   .btn-purple:hover { background: #7d52d4; }
+  .btn-green { background: #1db954; color: #fff; }
+  .btn-green:hover { background: #1ed760; }
   .btn-outline { background: transparent; border: 1px solid #2a2840; color: #a78be8; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; margin-top: .65rem; }
   .btn-outline:hover { border-color: #6c3fc5; background: #12121c; }
   .btn-sm { width: auto; padding: .32rem .8rem; font-size: .72rem; font-family: 'DM Sans', sans-serif; font-weight: 500; letter-spacing: .5px; border-radius: 6px; }
@@ -45,6 +47,21 @@
   .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
+  /* SPOTIFY CONNECT BAR */
+  .spotify-bar { display: flex; align-items: center; justify-content: space-between; background: #0d1a0d; border: 1px solid rgba(29,185,84,.25); border-radius: 10px; padding: .85rem 1.1rem; margin-bottom: 1.25rem; gap: 1rem; }
+  .spotify-bar.connected { border-color: rgba(29,185,84,.5); background: #0a1f0a; }
+  .spotify-info { display: flex; align-items: center; gap: .75rem; }
+  .spotify-logo { width: 28px; height: 28px; flex-shrink: 0; }
+  .spotify-status { font-size: .82rem; font-weight: 500; }
+  .spotify-status.ok { color: #1db954; }
+  .spotify-status.off { color: #4a4860; }
+  .spotify-sub { font-size: .7rem; color: #3a3850; margin-top: 1px; }
+  .spotify-btn { background: #1db954; border: none; border-radius: 6px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 500; padding: .45rem 1rem; cursor: pointer; white-space: nowrap; transition: background .2s; flex-shrink: 0; }
+  .spotify-btn:hover { background: #1ed760; }
+  .spotify-btn.disconnect { background: transparent; border: 1px solid #2a2840; color: #6b6880; }
+  .spotify-btn.disconnect:hover { border-color: #e24b4a; color: #e24b4a; }
+
+  /* QR */
   .qr-wrap { background: #fff; border-radius: 12px; padding: 1rem; width: fit-content; margin: 0 auto 1.25rem; }
   .url-box { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .65rem 1rem; font-size: .78rem; color: #6b6880; font-family: monospace; word-break: break-all; margin-bottom: .75rem; }
 
@@ -59,18 +76,20 @@
   .board-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; flex-wrap: wrap; gap: .5rem; }
   .board-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: #fff; }
 
+  .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: .68rem; color: #5c5a75; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+  .ld-pending { background: #f59e0b; } .ld-approved { background: #22c55e; } .ld-playing { background: #6c3fc5; } .ld-played { background: #3a3850; }
+
   .req-list { display: flex; flex-direction: column; gap: .7rem; }
   .req-card { background: #12121c; border: 1px solid #2a2840; border-radius: 12px; padding: .95rem 1.1rem; display: flex; align-items: flex-start; gap: .9rem; transition: border-color .2s, opacity .2s; animation: slideIn .3s ease; }
   @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-
-  /* Status styles */
   .req-card.status-pending { border-left: 3px solid #f59e0b; }
   .req-card.status-approved { border-left: 3px solid #22c55e; }
   .req-card.status-playing { border-color: #6c3fc5; background: #16122a; }
   .req-card.status-played { opacity: .4; }
   .req-card.karaoke-card.status-playing { border-color: #ec4899; background: #1a0e1a; }
 
-  /* Status pill on card */
   .status-pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 4px; padding: 2px 7px; font-size: .62rem; font-weight: 500; margin-top: 4px; }
   .pill-pending { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
   .pill-approved { background: rgba(34,197,94,.12); color: #22c55e; border: 1px solid rgba(34,197,94,.2); }
@@ -78,13 +97,25 @@
   .pill-played { background: rgba(255,255,255,.05); color: #44425a; border: 1px solid rgba(255,255,255,.08); }
 
   .type-pip { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; margin-top: 2px; }
-  .pip-music { background: rgba(108,63,197,.15); }
-  .pip-karaoke { background: rgba(236,72,153,.15); }
+  .pip-music { background: rgba(108,63,197,.15); } .pip-karaoke { background: rgba(236,72,153,.15); }
 
   .req-info { flex: 1; min-width: 0; }
   .req-song { font-weight: 500; font-size: .93rem; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .req-artist { font-size: .76rem; color: #6b6880; margin-top: 2px; }
   .req-meta { font-size: .68rem; color: #3a3850; margin-top: 3px; }
+
+  /* SPOTIFY TRACK PREVIEW on card */
+  .spotify-track { display: flex; align-items: center; gap: .65rem; background: #0a1f0a; border: 1px solid rgba(29,185,84,.2); border-radius: 8px; padding: .55rem .75rem; margin-top: .6rem; }
+  .spotify-art { width: 36px; height: 36px; border-radius: 4px; flex-shrink: 0; object-fit: cover; background: #1a2a1a; }
+  .spotify-track-info { flex: 1; min-width: 0; }
+  .spotify-track-name { font-size: .78rem; font-weight: 500; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .spotify-track-artist { font-size: .68rem; color: #5c5a75; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .spotify-open-btn { background: #1db954; border: none; border-radius: 5px; color: #fff; font-size: .65rem; font-weight: 600; padding: .3rem .6rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .2s; letter-spacing: .3px; }
+  .spotify-open-btn:hover { background: #1ed760; }
+  .spotify-queue-btn { background: transparent; border: 1px solid rgba(29,185,84,.3); border-radius: 5px; color: #1db954; font-size: .65rem; font-weight: 500; padding: .3rem .6rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all .2s; margin-left: .3rem; }
+  .spotify-queue-btn:hover { background: rgba(29,185,84,.1); }
+  .spotify-searching { font-size: .72rem; color: #3a5a3a; font-style: italic; padding: .4rem 0; }
+  .spotify-not-found { font-size: .72rem; color: #3a3850; padding: .4rem 0; }
 
   .req-actions { display: flex; gap: .35rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; max-width: 72px; }
   .icon-btn { background: #1a1830; border: 1px solid #2a2840; border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; transition: all .2s; color: #9997b0; }
@@ -97,27 +128,19 @@
   .empty-icon { font-size: 2.5rem; margin-bottom: .6rem; opacity: .5; }
   .empty-txt { font-size: .82rem; }
 
-  /* LEGEND */
-  .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: .68rem; color: #5c5a75; }
-  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
-  .ld-pending { background: #f59e0b; }
-  .ld-approved { background: #22c55e; }
-  .ld-playing { background: #6c3fc5; }
-  .ld-played { background: #3a3850; }
-
   /* DISPLAY */
   .display-screen { background: #06060f; border: 1px solid #1e1e2e; border-radius: 16px; padding: 2rem; min-height: 380px; }
   .np-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .5rem; }
   .np-song { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; color: #fff; line-height: 1.1; }
   .np-artist { font-size: .9rem; color: #a78be8; margin-top: .25rem; }
+  .np-art { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; display: none; }
   .np-type { font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; margin-top: .4rem; }
-  .np-type.karaoke { color: #f472b6; }
-  .np-type.music { color: #a78be8; }
+  .np-type.karaoke { color: #f472b6; } .np-type.music { color: #a78be8; }
   .np-empty { font-size: .88rem; color: #2e2c44; font-style: italic; }
   .queue-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .75rem; }
   .q-item { display: flex; align-items: center; gap: .8rem; background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 8px; padding: .6rem .9rem; margin-bottom: .45rem; }
   .q-num { font-family: 'Bebas Neue', sans-serif; font-size: .95rem; color: #2a2840; min-width: 18px; }
+  .q-art { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
   .q-song { font-size: .82rem; font-weight: 500; color: #d0ceea; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .q-sub { font-size: .7rem; color: #3a3850; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .q-pip { font-size: .75rem; margin-left: auto; flex-shrink: 0; }
@@ -126,7 +149,7 @@
   .fullscreen-btn:hover { border-color: #6c3fc5; color: #a78be8; }
   .display-hint { font-size: .68rem; color: #2a2840; text-align: center; margin-top: .75rem; }
 
-  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1830; border: 1px solid #2a2840; border-radius: 8px; padding: .6rem 1.25rem; font-size: .8rem; color: #a78be8; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1830; border: 1px solid #2a2840; border-radius: 8px; padding: .6rem 1.25rem; font-size: .8rem; color: #a78be8; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; max-width: 90vw; }
   .toast.show { opacity: 1; }
 </style>
 </head>
@@ -177,7 +200,18 @@
     </div>
   </div>
 
-  <!-- Legend -->
+  <!-- Spotify connect bar -->
+  <div class="spotify-bar" id="spotify-bar">
+    <div class="spotify-info">
+      <svg class="spotify-logo" viewBox="0 0 24 24" fill="#1db954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+      <div>
+        <div class="spotify-status off" id="spotify-status-text">Not connected</div>
+        <div class="spotify-sub" id="spotify-sub-text">Connect to search tracks and add to queue</div>
+      </div>
+    </div>
+    <button class="spotify-btn" id="spotify-connect-btn" onclick="spotifyLogin()">Connect Spotify</button>
+  </div>
+
   <div class="legend">
     <div class="legend-item"><div class="legend-dot ld-pending"></div>Awaiting approval</div>
     <div class="legend-item"><div class="legend-dot ld-approved"></div>Approved — on display</div>
@@ -206,287 +240,412 @@
   <div class="display-screen">
     <div style="margin-bottom:1.5rem">
       <div class="np-label">Now playing</div>
-      <div id="dp-song" class="np-song" style="display:none"></div>
-      <div id="dp-artist" class="np-artist" style="display:none"></div>
-      <div id="dp-type" class="np-type" style="display:none"></div>
-      <div id="dp-empty" class="np-empty">Nothing playing yet</div>
+      <div style="display:flex;align-items:flex-start;gap:1rem">
+        <img class="np-art" id="dp-art" src="" alt="">
+        <div>
+          <div id="dp-song" class="np-song" style="display:none"></div>
+          <div id="dp-artist" class="np-artist" style="display:none"></div>
+          <div id="dp-type" class="np-type" style="display:none"></div>
+          <div id="dp-empty" class="np-empty">Nothing playing yet</div>
+        </div>
+      </div>
     </div>
     <div class="divider" style="margin:.85rem 0 1rem"></div>
     <div class="queue-label">Up next — approved requests</div>
     <div id="queue-list"><div style="font-size:.8rem;color:#2e2c44;font-style:italic">No approved requests yet</div></div>
   </div>
-  <div class="display-hint">Only approved requests appear on the display. Approve requests in the Requests tab.</div>
+  <div class="display-hint">Only approved requests appear here. Approve in the Requests tab.</div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
-  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  var requests = [];
-  var currentFilter = 'all';
-  var FAN_URL_BASE = 'https://miimediatv-source.github.io/dj-request/index.html';
+var SPOTIFY_CLIENT_ID = 'd55bb04ad14f45068e2bad47ccfefff7';
+var SPOTIFY_REDIRECT = window.location.href.split('?')[0].split('#')[0];
+var SPOTIFY_SCOPES = 'user-modify-playback-state user-read-playback-state';
 
-  function fanURL() {
-    var v = getV();
-    return FAN_URL_BASE + '?dj=' + encodeURIComponent(v.name) + '&event=' + encodeURIComponent(v.event) + (v.venue ? '&venue=' + encodeURIComponent(v.venue) : '');
+var requests = [];
+var currentFilter = 'all';
+var spotifyToken = null;
+var spotifyCache = {}; // cache track results per request id
+var FAN_URL_BASE = 'https://miimediatv-source.github.io/dj-request/index.html';
+
+// ── SPOTIFY AUTH ──────────────────────────────────────────────
+function spotifyLogin() {
+  var state = Math.random().toString(36).substring(2);
+  sessionStorage.setItem('spotify_state', state);
+  var url = 'https://accounts.spotify.com/authorize'
+    + '?client_id=' + SPOTIFY_CLIENT_ID
+    + '&response_type=token'
+    + '&redirect_uri=' + encodeURIComponent(SPOTIFY_REDIRECT)
+    + '&scope=' + encodeURIComponent(SPOTIFY_SCOPES)
+    + '&state=' + state
+    + '&show_dialog=false';
+  window.location = url;
+}
+
+function spotifyLogout() {
+  spotifyToken = null;
+  sessionStorage.removeItem('spotify_token');
+  updateSpotifyUI();
+  renderBoard();
+}
+
+function checkSpotifyCallback() {
+  var hash = window.location.hash.substring(1);
+  if (!hash) {
+    var saved = sessionStorage.getItem('spotify_token');
+    if (saved) { spotifyToken = saved; updateSpotifyUI(); }
+    return;
   }
-
-  function getV() {
-    return {
-      name: document.getElementById('dj-name').value.trim() || 'Mii-Music',
-      event: document.getElementById('dj-event').value.trim() || 'Live Tonight',
-      venue: document.getElementById('dj-venue').value.trim()
-    };
+  var params = {};
+  hash.split('&').forEach(function(p) { var kv = p.split('='); params[kv[0]] = decodeURIComponent(kv[1]); });
+  if (params.access_token) {
+    spotifyToken = params.access_token;
+    sessionStorage.setItem('spotify_token', spotifyToken);
+    history.replaceState(null, '', window.location.pathname);
+    updateSpotifyUI();
+    showToast('✅ Spotify connected!');
+    go('board');
   }
+}
 
-  function go(tab) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + tab).classList.add('active');
-    var tabs = document.querySelectorAll('.nav-tab');
-    ['setup','share','board','display'].forEach(function(n,i){ if(n===tab) tabs[i].classList.add('active'); });
-    if (tab === 'share') genQR();
-    if (tab === 'display') renderDisplay();
+function updateSpotifyUI() {
+  var bar = document.getElementById('spotify-bar');
+  var statusTxt = document.getElementById('spotify-status-text');
+  var subTxt = document.getElementById('spotify-sub-text');
+  var btn = document.getElementById('spotify-connect-btn');
+  if (spotifyToken) {
+    bar.classList.add('connected');
+    statusTxt.textContent = 'Spotify connected';
+    statusTxt.className = 'spotify-status ok';
+    subTxt.textContent = 'Track search and queue active';
+    btn.textContent = 'Disconnect';
+    btn.className = 'spotify-btn disconnect';
+    btn.onclick = spotifyLogout;
+  } else {
+    bar.classList.remove('connected');
+    statusTxt.textContent = 'Not connected';
+    statusTxt.className = 'spotify-status off';
+    subTxt.textContent = 'Connect to search tracks and auto-queue';
+    btn.textContent = 'Connect Spotify';
+    btn.className = 'spotify-btn';
+    btn.onclick = spotifyLogin;
   }
+}
 
-  function sync() {
-    document.getElementById('fan-url-display').textContent = fanURL();
-  }
-
-  function copyFanLink() {
-    navigator.clipboard.writeText(fanURL()).then(function(){ showToast('Fan link copied!'); });
-  }
-
-  function openFanPage() { window.open(fanURL(), '_blank'); }
-
-  function genQR() {
-    var url = fanURL();
-    var box = document.getElementById('qr-box');
-    box.innerHTML = '';
-    document.getElementById('fan-url-display').textContent = url;
-    try {
-      new QRCode(box, { text: url, width: 200, height: 200, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M });
-    } catch(e) { box.textContent = 'Error generating QR'; }
-  }
-
-  function setFilter(f, el) {
-    currentFilter = f;
-    document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    renderBoard();
-  }
-
-  function filteredRequests() {
-    return requests.filter(function(r) {
-      if (r.status === 'deleted') return false;
-      if (currentFilter === 'pending') return r.status === 'pending';
-      if (currentFilter === 'approved') return r.status === 'approved';
-      if (currentFilter === 'music') return (r.type === 'music' || !r.type) && r.status !== 'deleted';
-      if (currentFilter === 'karaoke') return r.type === 'karaoke';
-      return true; // 'all'
+// ── SPOTIFY API ───────────────────────────────────────────────
+async function spotifySearch(query) {
+  if (!spotifyToken) return null;
+  try {
+    var res = await fetch('https://api.spotify.com/v1/search?q=' + encodeURIComponent(query) + '&type=track&limit=1', {
+      headers: { 'Authorization': 'Bearer ' + spotifyToken }
     });
-  }
+    if (res.status === 401) { spotifyLogout(); return null; }
+    var data = await res.json();
+    if (data.tracks && data.tracks.items.length > 0) return data.tracks.items[0];
+    return null;
+  } catch(e) { return null; }
+}
 
-  function statusPill(status) {
-    var map = {
-      pending:  ['pill-pending',  '⏳ Awaiting approval'],
-      approved: ['pill-approved', '✅ Approved — on display'],
-      playing:  ['pill-playing',  '♪ Now playing'],
-      played:   ['pill-played',   '✓ Played']
-    };
-    var s = map[status] || map['pending'];
-    return '<span class="status-pill ' + s[0] + '">' + s[1] + '</span>';
-  }
+async function spotifyAddToQueue(trackUri) {
+  if (!spotifyToken || !trackUri) return false;
+  try {
+    var res = await fetch('https://api.spotify.com/v1/me/player/queue?uri=' + encodeURIComponent(trackUri), {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + spotifyToken }
+    });
+    return res.status === 204;
+  } catch(e) { return false; }
+}
 
-  function renderBoard() {
-    var visible = requests.filter(r => r.status !== 'deleted');
-    document.getElementById('req-count').textContent = visible.length + ' request' + (visible.length !== 1 ? 's' : '');
-    var list = document.getElementById('req-list');
-    var filtered = filteredRequests();
-    if (!filtered.length) {
-      var icons = { pending:'⏳', approved:'✅', karaoke:'🎤' };
-      var icon = icons[currentFilter] || '🎵';
-      list.innerHTML = '<div class="empty-state"><div class="empty-icon">'+icon+'</div><div class="empty-txt">No ' + (currentFilter === 'all' ? '' : currentFilter + ' ') + 'requests yet</div></div>';
-      return;
+async function searchAndCacheTrack(r) {
+  if (spotifyCache[r.id] !== undefined) return; // already searched
+  spotifyCache[r.id] = 'searching';
+  renderBoard();
+  var query = r.song + (r.artist ? ' ' + r.artist : '');
+  var track = await spotifySearch(query);
+  spotifyCache[r.id] = track || null;
+  renderBoard();
+  return track;
+}
+
+// ── CORE ──────────────────────────────────────────────────────
+function fanURL() {
+  var v = getV();
+  return FAN_URL_BASE + '?dj=' + encodeURIComponent(v.name) + '&event=' + encodeURIComponent(v.event) + (v.venue ? '&venue=' + encodeURIComponent(v.venue) : '');
+}
+
+function getV() {
+  return {
+    name: document.getElementById('dj-name').value.trim() || 'Mii-Music',
+    event: document.getElementById('dj-event').value.trim() || 'Live Tonight',
+    venue: document.getElementById('dj-venue').value.trim()
+  };
+}
+
+function go(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  var tabs = document.querySelectorAll('.nav-tab');
+  ['setup','share','board','display'].forEach(function(n,i){ if(n===tab) tabs[i].classList.add('active'); });
+  if (tab === 'share') genQR();
+  if (tab === 'display') renderDisplay();
+}
+
+function sync() { document.getElementById('fan-url-display').textContent = fanURL(); }
+function copyFanLink() { navigator.clipboard.writeText(fanURL()).then(function(){ showToast('Fan link copied!'); }); }
+function openFanPage() { window.open(fanURL(), '_blank'); }
+
+function genQR() {
+  var url = fanURL();
+  var box = document.getElementById('qr-box');
+  box.innerHTML = '';
+  document.getElementById('fan-url-display').textContent = url;
+  try { new QRCode(box, { text: url, width: 200, height: 200, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M }); }
+  catch(e) { box.textContent = 'Error generating QR'; }
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderBoard();
+}
+
+function filteredRequests() {
+  return requests.filter(function(r) {
+    if (r.status === 'deleted') return false;
+    if (currentFilter === 'pending') return r.status === 'pending';
+    if (currentFilter === 'approved') return r.status === 'approved';
+    if (currentFilter === 'music') return (r.type === 'music' || !r.type);
+    if (currentFilter === 'karaoke') return r.type === 'karaoke';
+    return true;
+  });
+}
+
+function spotifyTrackHTML(r) {
+  if (!spotifyToken) return '';
+  var cached = spotifyCache[r.id];
+  if (cached === undefined) return '<div class="spotify-searching">Searching Spotify...</div>';
+  if (cached === 'searching') return '<div class="spotify-searching">Searching Spotify...</div>';
+  if (!cached) return '<div class="spotify-not-found">Not found on Spotify</div>';
+  var art = cached.album && cached.album.images[0] ? cached.album.images[0].url : '';
+  var trackName = cached.name;
+  var artistName = cached.artists.map(a => a.name).join(', ');
+  var uri = cached.uri;
+  var openUrl = 'https://open.spotify.com/track/' + cached.id;
+  return '<div class="spotify-track">'
+    + (art ? '<img class="spotify-art" src="'+art+'" alt="">' : '')
+    + '<div class="spotify-track-info"><div class="spotify-track-name">'+esc(trackName)+'</div><div class="spotify-track-artist">'+esc(artistName)+'</div></div>'
+    + '<button class="spotify-open-btn" onclick="window.open(\''+openUrl+'\',\'_blank\')">Open</button>'
+    + '<button class="spotify-queue-btn" onclick="queueTrack(\''+uri+'\','+r.id+')">+ Queue</button>'
+    + '</div>';
+}
+
+function statusPill(status) {
+  var map = { pending:['pill-pending','⏳ Awaiting approval'], approved:['pill-approved','✅ Approved'], playing:['pill-playing','♪ Now playing'], played:['pill-played','✓ Played'] };
+  var s = map[status] || map['pending'];
+  return '<span class="status-pill '+s[0]+'">'+s[1]+'</span>';
+}
+
+function renderBoard() {
+  var visible = requests.filter(r => r.status !== 'deleted');
+  document.getElementById('req-count').textContent = visible.length + ' request' + (visible.length !== 1 ? 's' : '');
+  var list = document.getElementById('req-list');
+  var filtered = filteredRequests();
+  if (!filtered.length) {
+    var icons = { pending:'⏳', approved:'✅', karaoke:'🎤' };
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">'+(icons[currentFilter]||'🎵')+'</div><div class="empty-txt">No '+(currentFilter==='all'?'':currentFilter+' ')+'requests yet</div></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(r) {
+    var isKaraoke = r.type === 'karaoke';
+    var cls = 'status-' + (r.status||'pending') + (isKaraoke ? ' karaoke-card' : '');
+    var meta = 'from ' + esc(r.fan_name||'Anonymous') + ' · ' + fmtTime(r.created_at);
+    if (isKaraoke && r.performer) meta = 'Performer: ' + esc(r.performer) + ' · ' + fmtTime(r.created_at);
+    var actions = '';
+    if (r.status === 'pending') actions += '<div class="icon-btn approve" title="Approve" onclick="approveReq('+r.id+')">✓</div>';
+    if (r.status === 'approved') actions += '<div class="icon-btn play" title="Now playing" onclick="markPlaying('+r.id+')">▶</div>';
+    if (r.status === 'playing') {
+      actions += '<div class="icon-btn" style="color:#6c3fc5;border-color:#6c3fc5;cursor:default">♪</div>';
+      actions += '<div class="icon-btn done" title="Mark played" onclick="markPlayed('+r.id+')">✓</div>';
     }
+    if (r.status !== 'playing') actions += '<div class="icon-btn del" onclick="delReq('+r.id+')">✕</div>';
+    var spHtml = (r.type !== 'karaoke' && (r.status === 'approved' || r.status === 'playing')) ? spotifyTrackHTML(r) : '';
+    return '<div class="req-card '+cls+'">'
+      + '<div class="type-pip '+(isKaraoke?'pip-karaoke':'pip-music')+'">'+(isKaraoke?'🎤':'🎵')+'</div>'
+      + '<div class="req-info">'
+        + '<div class="req-song">'+esc(r.song)+'</div>'
+        + '<div class="req-artist">'+esc(r.artist||'—')+'</div>'
+        + '<div class="req-meta">'+meta+'</div>'
+        + statusPill(r.status)
+        + spHtml
+      + '</div>'
+      + '<div class="req-actions">'+actions+'</div></div>';
+  }).join('');
+}
 
-    list.innerHTML = filtered.map(function(r) {
-      var isKaraoke = r.type === 'karaoke';
-      var statusClass = 'status-' + (r.status || 'pending');
-      var cls = statusClass + (isKaraoke ? ' karaoke-card' : '');
-      var meta = 'from ' + esc(r.fan_name || 'Anonymous') + ' · ' + fmtTime(r.created_at);
-      if (isKaraoke && r.performer) meta = 'Performer: ' + esc(r.performer) + ' · ' + fmtTime(r.created_at);
-
-      // Action buttons based on status
-      var actions = '';
-      if (r.status === 'pending') {
-        actions += '<div class="icon-btn approve" title="Approve — adds to display queue" onclick="approveReq('+r.id+')">✓</div>';
-      }
-      if (r.status === 'approved') {
-        actions += '<div class="icon-btn play" title="Mark as now playing" onclick="markPlaying('+r.id+')">▶</div>';
-      }
-      if (r.status === 'playing') {
-        actions += '<div class="icon-btn" style="color:#6c3fc5;border-color:#6c3fc5;cursor:default">♪</div>';
-        actions += '<div class="icon-btn done" title="Mark as played" onclick="markPlayed('+r.id+')">✓</div>';
-      }
-      if (r.status !== 'playing') {
-        actions += '<div class="icon-btn del" title="Remove" onclick="delReq('+r.id+')">✕</div>';
-      }
-
-      return '<div class="req-card ' + cls + '">' +
-        '<div class="type-pip ' + (isKaraoke ? 'pip-karaoke' : 'pip-music') + '">' + (isKaraoke ? '🎤' : '🎵') + '</div>' +
-        '<div class="req-info">' +
-          '<div class="req-song">' + esc(r.song) + '</div>' +
-          '<div class="req-artist">' + esc(r.artist || '—') + '</div>' +
-          '<div class="req-meta">' + meta + '</div>' +
-          statusPill(r.status) +
-        '</div>' +
-        '<div class="req-actions">' + actions + '</div></div>';
-    }).join('');
-  }
-
-  async function approveReq(id) {
-    await sb.from('requests').update({ status: 'approved' }).eq('id', id);
-    var r = requests.find(r => r.id === id);
-    if (r) r.status = 'approved';
-    renderBoard(); renderDisplay();
-    showToast('✅ Request approved — added to display queue');
-  }
-
-  async function markPlaying(id) {
-    // Demote any currently playing back to approved
-    await sb.from('requests').update({ status: 'approved' }).eq('status', 'playing');
-    await sb.from('requests').update({ status: 'playing' }).eq('id', id);
-    requests.forEach(r => { if (r.status === 'playing') r.status = 'approved'; });
-    var r = requests.find(r => r.id === id);
-    if (r) r.status = 'playing';
-    renderBoard(); renderDisplay();
-  }
-
-  async function markPlayed(id) {
-    await sb.from('requests').update({ status: 'played' }).eq('id', id);
-    var r = requests.find(r => r.id === id);
-    if (r) r.status = 'played';
-    renderBoard(); renderDisplay();
-  }
-
-  async function delReq(id) {
-    await sb.from('requests').update({ status: 'deleted' }).eq('id', id);
-    var r = requests.find(r => r.id === id);
-    if (r) r.status = 'deleted';
-    renderBoard(); renderDisplay();
-  }
-
-  async function clearPlayed() {
-    await sb.from('requests').update({ status: 'deleted' }).eq('status', 'played');
-    requests = requests.filter(r => r.status !== 'played' && r.status !== 'deleted');
-    renderBoard();
-  }
-
-  function renderDisplay() {
-    var playing = requests.find(r => r.status === 'playing');
-    // Only approved + playing show on display
-    var queue = requests.filter(r => r.status === 'approved');
-    var s = document.getElementById('dp-song');
-    var a = document.getElementById('dp-artist');
-    var tp = document.getElementById('dp-type');
-    var e = document.getElementById('dp-empty');
-
-    if (playing) {
-      s.textContent = playing.song;
-      a.textContent = playing.artist || '';
-      tp.textContent = playing.type === 'karaoke' ? '🎤 Karaoke' + (playing.performer ? ' · ' + playing.performer : '') : '🎵 Song Request';
-      tp.className = 'np-type ' + (playing.type || 'music');
-      s.style.display = 'block';
-      a.style.display = playing.artist ? 'block' : 'none';
-      tp.style.display = 'block';
-      e.style.display = 'none';
-    } else {
-      s.style.display = 'none';
-      a.style.display = 'none';
-      tp.style.display = 'none';
-      e.style.display = 'block';
-    }
-
-    var ql = document.getElementById('queue-list');
-    if (!queue.length) {
-      ql.innerHTML = '<div style="font-size:.8rem;color:#2e2c44;font-style:italic">No approved requests yet</div>';
-      return;
-    }
-    ql.innerHTML = queue.slice(0,6).map(function(r, i) {
-      var sub = (r.artist || '') + (r.fan_name ? ' · from ' + r.fan_name : '');
-      if (r.type === 'karaoke' && r.performer) sub = 'Performer: ' + r.performer;
-      return '<div class="q-item"><div class="q-num">'+(i+1)+'</div>' +
-        '<div style="min-width:0;flex:1"><div class="q-song">'+esc(r.song)+'</div><div class="q-sub">'+esc(sub)+'</div></div>' +
-        '<div class="q-pip">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
-    }).join('');
-  }
-
-  function openFullscreen() {
-    var v = getV();
-    var playing = requests.find(r => r.status === 'playing');
-    var queue = requests.filter(r => r.status === 'approved');
-    var nowHtml = playing
-      ? '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:5vw;letter-spacing:3px;color:#fff;line-height:1.1">'+esc(playing.song)+'</div>'
-        +(playing.artist?'<div style="font-size:2vw;color:#a78be8;margin-top:.4rem">'+esc(playing.artist)+'</div>':'')
-        +'<div style="font-size:1.1vw;letter-spacing:2px;text-transform:uppercase;color:'+(playing.type==='karaoke'?'#f472b6':'#6c3fc5')+';margin-top:.5rem">'+(playing.type==='karaoke'?'🎤 Karaoke'+(playing.performer?' · '+esc(playing.performer):''):'🎵 Song Request')+'</div>'
-      : '<div style="font-size:2vw;color:#2e2c44;font-style:italic">Nothing playing yet</div>';
-    var qHtml = queue.slice(0,6).map(function(r,i){
-      var sub = (r.artist?esc(r.artist)+' · ':'')+(r.type==='karaoke'&&r.performer?'Performer: '+esc(r.performer):'from '+(r.fan_name||'Anonymous'));
-      return '<div style="display:flex;gap:1rem;align-items:center;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:8px;padding:.75rem 1.25rem;margin-bottom:.5rem">'
-        +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;color:#2a2840;min-width:24px">'+(i+1)+'</div>'
-        +'<div style="flex:1;min-width:0"><div style="font-size:1.1rem;font-weight:500;color:#d0ceea">'+esc(r.song)+'</div>'
-        +'<div style="font-size:.82rem;color:#3a3850;margin-top:2px">'+sub+'</div></div>'
-        +'<div style="font-size:1.1rem">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
-    }).join('') || '<div style="font-size:1rem;color:#2e2c44;font-style:italic;padding:.5rem 0">No approved requests yet</div>';
-    var w = window.open('','_blank','menubar=no,toolbar=no,location=no,status=no');
-    w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#06060f;color:#f0eef8;font-family:DM Sans,sans-serif;min-height:100vh;padding:4vw}</style></head><body>'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3vw">'
-      +'<div><div style="font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:.6rem">Now playing</div>'+nowHtml+'</div>'
-      +'<div style="text-align:right"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:#2e2c44">'+esc(v.name)+'</div>'
-      +'<div style="font-size:.8rem;color:#2e2c44;margin-top:3px">'+esc(v.event)+'</div></div></div>'
-      +'<hr style="border:none;border-top:1px solid #1e1e2e;margin-bottom:2.5vw">'
-      +'<div style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:1rem">Up next</div>'
-      +qHtml+'</body></html>');
-    w.document.close();
-  }
-
-  function initRealtime() {
-    sb.channel('requests-rt')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, function(payload) {
-        if (payload.eventType === 'INSERT') {
-          requests.unshift(payload.new);
-          var icon = payload.new.type === 'karaoke' ? '🎤' : '🎵';
-          showToast(icon + ' New request: ' + payload.new.song + ' — awaiting approval');
-        } else if (payload.eventType === 'UPDATE') {
-          var idx = requests.findIndex(r => r.id === payload.new.id);
-          if (idx >= 0) requests[idx] = payload.new; else requests.unshift(payload.new);
-        } else if (payload.eventType === 'DELETE') {
-          requests = requests.filter(r => r.id !== payload.old.id);
+async function approveReq(id) {
+  await sb.from('requests').update({ status: 'approved' }).eq('id', id);
+  var r = requests.find(r => r.id === id);
+  if (r) {
+    r.status = 'approved';
+    // Auto search Spotify on approval
+    if (spotifyToken && r.type !== 'karaoke') {
+      searchAndCacheTrack(r).then(async function(track) {
+        if (track) {
+          // Auto-add to queue
+          var ok = await spotifyAddToQueue(track.uri);
+          if (ok) showToast('🎵 Added to Spotify queue: ' + track.name);
+          else showToast('✅ Approved — open Spotify and play something first to enable queuing');
         }
-        renderBoard(); renderDisplay();
-      }).subscribe();
+      });
+    }
   }
+  renderBoard(); renderDisplay();
+  showToast('✅ Request approved — added to display');
+}
 
-  async function loadRequests() {
-    var res = await sb.from('requests').select('*').order('created_at', { ascending: false });
-    if (res.data) { requests = res.data; renderBoard(); renderDisplay(); }
+async function queueTrack(uri, id) {
+  var ok = await spotifyAddToQueue(uri);
+  if (ok) showToast('🎵 Added to Spotify queue!');
+  else showToast('⚠️ Make sure Spotify is open and playing on a device');
+}
+
+async function markPlaying(id) {
+  await sb.from('requests').update({ status: 'approved' }).eq('status', 'playing');
+  await sb.from('requests').update({ status: 'playing' }).eq('id', id);
+  requests.forEach(r => { if (r.status === 'playing') r.status = 'approved'; });
+  var r = requests.find(r => r.id === id); if (r) r.status = 'playing';
+  renderBoard(); renderDisplay();
+}
+
+async function markPlayed(id) {
+  await sb.from('requests').update({ status: 'played' }).eq('id', id);
+  var r = requests.find(r => r.id === id); if (r) r.status = 'played';
+  renderBoard(); renderDisplay();
+}
+
+async function delReq(id) {
+  await sb.from('requests').update({ status: 'deleted' }).eq('id', id);
+  var r = requests.find(r => r.id === id); if (r) r.status = 'deleted';
+  renderBoard(); renderDisplay();
+}
+
+async function clearPlayed() {
+  await sb.from('requests').update({ status: 'deleted' }).eq('status', 'played');
+  requests = requests.filter(r => r.status !== 'played' && r.status !== 'deleted');
+  renderBoard();
+}
+
+function renderDisplay() {
+  var playing = requests.find(r => r.status === 'playing');
+  var queue = requests.filter(r => r.status === 'approved');
+  var s = document.getElementById('dp-song'), a = document.getElementById('dp-artist');
+  var tp = document.getElementById('dp-type'), e = document.getElementById('dp-empty');
+  var art = document.getElementById('dp-art');
+  if (playing) {
+    s.textContent = playing.song; a.textContent = playing.artist || '';
+    tp.textContent = playing.type === 'karaoke' ? '🎤 Karaoke'+(playing.performer?' · '+playing.performer:'') : '🎵 Song Request';
+    tp.className = 'np-type '+(playing.type||'music');
+    s.style.display = 'block'; a.style.display = playing.artist?'block':'none'; tp.style.display = 'block'; e.style.display = 'none';
+    var cached = spotifyCache[playing.id];
+    if (cached && cached !== 'searching' && cached.album && cached.album.images[0]) {
+      art.src = cached.album.images[0].url; art.style.display = 'block';
+    } else { art.style.display = 'none'; }
+  } else {
+    s.style.display = 'none'; a.style.display = 'none'; tp.style.display = 'none'; e.style.display = 'block'; art.style.display = 'none';
   }
+  var ql = document.getElementById('queue-list');
+  if (!queue.length) { ql.innerHTML = '<div style="font-size:.8rem;color:#2e2c44;font-style:italic">No approved requests yet</div>'; return; }
+  ql.innerHTML = queue.slice(0,6).map(function(r,i){
+    var sub = (r.artist||'')+(r.fan_name?' · from '+r.fan_name:'');
+    if (r.type==='karaoke'&&r.performer) sub='Performer: '+r.performer;
+    var cached = spotifyCache[r.id];
+    var artUrl = (cached && cached !== 'searching' && cached.album && cached.album.images[0]) ? cached.album.images[0].url : '';
+    return '<div class="q-item"><div class="q-num">'+(i+1)+'</div>'
+      +(artUrl?'<img class="q-art" src="'+artUrl+'" alt="">':'')
+      +'<div style="min-width:0;flex:1"><div class="q-song">'+esc(r.song)+'</div><div class="q-sub">'+esc(sub)+'</div></div>'
+      +'<div class="q-pip">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
+  }).join('');
+}
 
-  function fmtTime(ts) { return ts ? new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : ''; }
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function showToast(msg) {
-    var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
-    setTimeout(function(){ t.classList.remove('show'); }, 3500);
-  }
+function openFullscreen() {
+  var v = getV();
+  var playing = requests.find(r => r.status === 'playing');
+  var queue = requests.filter(r => r.status === 'approved');
+  var playingArt = playing && spotifyCache[playing.id] && spotifyCache[playing.id].album ? spotifyCache[playing.id].album.images[0].url : '';
+  var nowHtml = playing
+    ? '<div style="display:flex;align-items:center;gap:2vw">'
+      +(playingArt?'<img src="'+playingArt+'" style="width:8vw;height:8vw;border-radius:1vw;object-fit:cover">':'')
+      +'<div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:5vw;letter-spacing:3px;color:#fff;line-height:1.1">'+esc(playing.song)+'</div>'
+      +(playing.artist?'<div style="font-size:2vw;color:#a78be8;margin-top:.3rem">'+esc(playing.artist)+'</div>':'')
+      +'<div style="font-size:1vw;letter-spacing:2px;text-transform:uppercase;color:'+(playing.type==='karaoke'?'#f472b6':'#6c3fc5')+';margin-top:.4rem">'+(playing.type==='karaoke'?'🎤 Karaoke':'🎵 Song Request')+'</div>'
+      +'</div></div>'
+    : '<div style="font-size:2vw;color:#2e2c44;font-style:italic">Nothing playing yet</div>';
+  var qHtml = queue.slice(0,6).map(function(r,i){
+    var sub=(r.artist?esc(r.artist)+' · ':'')+(r.type==='karaoke'&&r.performer?'Performer: '+esc(r.performer):'from '+(r.fan_name||'Anonymous'));
+    var qArt = spotifyCache[r.id] && spotifyCache[r.id].album ? spotifyCache[r.id].album.images[0].url : '';
+    return '<div style="display:flex;gap:1rem;align-items:center;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:8px;padding:.75rem 1.25rem;margin-bottom:.5rem">'
+      +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;color:#2a2840;min-width:24px">'+(i+1)+'</div>'
+      +(qArt?'<img src="'+qArt+'" style="width:36px;height:36px;border-radius:4px;object-fit:cover">':'')
+      +'<div style="flex:1;min-width:0"><div style="font-size:1.1rem;font-weight:500;color:#d0ceea">'+esc(r.song)+'</div>'
+      +'<div style="font-size:.82rem;color:#3a3850;margin-top:2px">'+sub+'</div></div>'
+      +'<div style="font-size:1.1rem">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
+  }).join('') || '<div style="font-size:1rem;color:#2e2c44;font-style:italic;padding:.5rem 0">No approved requests yet</div>';
+  var w = window.open('','_blank','menubar=no,toolbar=no,location=no,status=no');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#06060f;color:#f0eef8;font-family:DM Sans,sans-serif;min-height:100vh;padding:4vw}</style></head><body>'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3vw">'
+    +'<div><div style="font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:.6rem">Now playing</div>'+nowHtml+'</div>'
+    +'<div style="text-align:right"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:#2e2c44">'+esc(v.name)+'</div>'
+    +'<div style="font-size:.8rem;color:#2e2c44;margin-top:3px">'+esc(v.event)+'</div></div></div>'
+    +'<hr style="border:none;border-top:1px solid #1e1e2e;margin-bottom:2.5vw">'
+    +'<div style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:1rem">Up next</div>'
+    +qHtml+'</body></html>');
+  w.document.close();
+}
 
-  sync();
-  loadRequests();
-  initRealtime();
-  setInterval(loadRequests, 60000);
+function initRealtime() {
+  sb.channel('requests-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, function(payload) {
+      if (payload.eventType === 'INSERT') {
+        requests.unshift(payload.new);
+        var icon = payload.new.type === 'karaoke' ? '🎤' : '🎵';
+        showToast(icon + ' New request: ' + payload.new.song + ' — awaiting approval');
+      } else if (payload.eventType === 'UPDATE') {
+        var idx = requests.findIndex(r => r.id === payload.new.id);
+        if (idx >= 0) requests[idx] = payload.new; else requests.unshift(payload.new);
+      } else if (payload.eventType === 'DELETE') {
+        requests = requests.filter(r => r.id !== payload.old.id);
+      }
+      renderBoard(); renderDisplay();
+    }).subscribe();
+}
+
+async function loadRequests() {
+  var res = await sb.from('requests').select('*').order('created_at', { ascending: false });
+  if (res.data) { requests = res.data; renderBoard(); renderDisplay(); }
+}
+
+function fmtTime(ts) { return ts ? new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : ''; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(msg) {
+  var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+
+// Init
+checkSpotifyCallback();
+sync();
+loadRequests();
+initRealtime();
+setInterval(loadRequests, 60000);
 </script>
 </body>
 </html>
