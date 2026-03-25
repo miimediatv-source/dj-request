@@ -107,6 +107,7 @@
   /* SPOTIFY TRACK PREVIEW on card */
   .spotify-track { display: flex; align-items: center; gap: .65rem; background: #0a1f0a; border: 1px solid rgba(29,185,84,.2); border-radius: 8px; padding: .55rem .75rem; margin-top: .6rem; }
   .spotify-art { width: 36px; height: 36px; border-radius: 4px; flex-shrink: 0; object-fit: cover; background: #1a2a1a; }
+  .spotify-art-hidden { display: none; }
   .spotify-track-info { flex: 1; min-width: 0; }
   .spotify-track-name { font-size: .78rem; font-weight: 500; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .spotify-track-artist { font-size: .68rem; color: #5c5a75; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -407,25 +408,28 @@ function updateSpotifyUI() {
 }
 
 // ── SPOTIFY API ───────────────────────────────────────────────
-async function spotifySearch(query) {
-  if (!spotifyToken) { console.warn('Spotify: no token'); return null; }
+async function musicSearch(song, artist) {
   try {
-    console.log('Spotify searching:', query);
-    var res = await fetch('https://api.spotify.com/v1/search?q=' + encodeURIComponent(query) + '&type=track&limit=1', {
-      headers: { 'Authorization': 'Bearer ' + spotifyToken }
+    var query = 'recording:"' + song + '"' + (artist ? ' AND artist:"' + artist + '"' : '');
+    var res = await fetch('https://musicbrainz.org/ws/2/recording/?query=' + encodeURIComponent(query) + '&limit=1&fmt=json', {
+      headers: { 'User-Agent': 'MiiMusic/1.0 (contact@miimediatv.com)' }
     });
-    console.log('Spotify response status:', res.status);
-    if (res.status === 401 || res.status === 403) {
-      console.warn('Spotify: token invalid/expired, clearing session');
-      spotifyLogout();
-      showToast('⚠️ Spotify session expired — please reconnect');
-      return null;
-    }
+    if (!res.ok) return null;
     var data = await res.json();
-    console.log('Spotify result:', data.tracks ? data.tracks.items[0] : data);
-    if (data.tracks && data.tracks.items.length > 0) return data.tracks.items[0];
-    return null;
-  } catch(e) { console.error('Spotify error:', e); return null; }
+    if (!data.recordings || !data.recordings.length) return null;
+    var rec = data.recordings[0];
+    var release = rec.releases && rec.releases[0];
+    var releaseId = release ? release.id : null;
+    var artistName = rec['artist-credit'] ? rec['artist-credit'].map(a => a.artist ? a.artist.name : '').join(', ') : (artist || '');
+    var coverUrl = null;
+    if (releaseId) {
+      try {
+        var cr = await fetch('https://coverartarchive.org/release/' + releaseId + '/front-250', { redirect: 'follow' });
+        if (cr.ok) coverUrl = cr.url;
+      } catch(e) {}
+    }
+    return { id: rec.id, name: rec.title, artist: artistName, coverUrl: coverUrl, uri: null };
+  } catch(e) { console.error('MusicBrainz error:', e); return null; }
 }
 
 async function spotifyAddToQueue(trackUri) {
@@ -448,8 +452,7 @@ async function searchAndCacheTrack(r) {
   if (spotifyCache[r.id] !== undefined) return spotifyCache[r.id] !== 'searching' ? spotifyCache[r.id] : null;
   spotifyCache[r.id] = 'searching';
   renderBoard();
-  var query = r.song + (r.artist ? ' ' + r.artist : '');
-  var track = await spotifySearch(query);
+  var track = await musicSearch(r.song, r.artist || '');
   spotifyCache[r.id] = track || null;
   renderBoard(); // re-render with result
   renderDisplay();
@@ -458,7 +461,6 @@ async function searchAndCacheTrack(r) {
 
 // Search Spotify for all approved/playing requests that haven't been searched yet
 async function searchAllApproved() {
-  if (!spotifyToken) return;
   var toSearch = requests.filter(r =>
     (r.status === 'approved' || r.status === 'playing') &&
     r.type !== 'karaoke' &&
@@ -526,22 +528,23 @@ function filteredRequests() {
 }
 
 function spotifyTrackHTML(r) {
-  if (!spotifyToken) return '';
   var cached = spotifyCache[r.id];
-  if (cached === undefined) return '<div class="spotify-searching">Searching Spotify...</div>';
-  if (cached === 'searching') return '<div class="spotify-searching">Searching Spotify...</div>';
-  if (!cached) return '<div class="spotify-not-found">Not found on Spotify</div>';
-  var art = cached.album && cached.album.images[0] ? cached.album.images[0].url : '';
-  var trackName = cached.name;
-  var artistName = cached.artists.map(a => a.name).join(', ');
-  var uri = cached.uri;
-  var openUrl = 'https://open.spotify.com/track/' + cached.id;
+  if (cached === undefined) return '<div class="spotify-searching">Searching track info...</div>';
+  if (cached === 'searching') return '<div class="spotify-searching">Searching track info...</div>';
+  if (!cached) return '<div class="spotify-not-found">Track not found in music database</div>';
+  var art = cached.coverUrl || '';
+  var trackName = cached.name || '';
+  var artistName = cached.artist || '';
+  var sq = encodeURIComponent(trackName + ' ' + artistName);
+  var spotifyUrl = 'https://open.spotify.com/search/' + sq;
+  var queueHtml = spotifyToken
+    ? '<button class="spotify-queue-btn" onclick="queueSpotifyTrack(' + r.id + ',' + JSON.stringify(trackName) + ',' + JSON.stringify(artistName) + ')">+ Queue</button>'
+    : '';
   return '<div class="spotify-track">'
-    + (art ? '<img class="spotify-art" src="'+art+'" alt="">' : '')
-    + '<div class="spotify-track-info"><div class="spotify-track-name">'+esc(trackName)+'</div><div class="spotify-track-artist">'+esc(artistName)+'</div></div>'
-    + '<button class="spotify-open-btn" onclick="window.open(\''+openUrl+'\',\'_blank\')">Open</button>'
-    + '<button class="spotify-queue-btn" onclick="queueTrack(\''+uri+'\','+r.id+')">+ Queue</button>'
-    + '</div>';
+    + (art ? '<img class="spotify-art" src="' + art + '" alt="">' : '')
+    + '<div class="spotify-track-info"><div class="spotify-track-name">' + esc(trackName) + '</div><div class="spotify-track-artist">' + esc(artistName) + '</div></div>'
+    + '<button class="spotify-open-btn" onclick="window.open('' + spotifyUrl + '','_blank')">Spotify</button>'
+    + queueHtml + '</div>';
 }
 
 function statusPill(status) {
@@ -592,21 +595,9 @@ async function approveReq(id) {
   var r = requests.find(r => r.id === id);
   if (r) {
     r.status = 'approved';
-    // Auto search Spotify on approval
-    if (spotifyToken && r.type !== 'karaoke') {
+    if (r.type !== 'karaoke') {
       searchAndCacheTrack(r).then(async function(track) {
-        if (track) {
-          var result = await spotifyAddToQueue(track.uri);
-          if (result === 'ok') {
-            showToast('🎵 Queued on Spotify: ' + track.name);
-          } else if (result === 'no_device' || result === 'forbidden') {
-            showToast('⚠️ Open Spotify and start playing something first, then approve again');
-          } else if (result === 'expired') {
-            showToast('⚠️ Spotify session expired — reconnect in the Requests tab');
-          } else {
-            showToast('✅ Approved — Spotify track found but could not auto-queue');
-          }
-        }
+        if (track && spotifyToken) queueSpotifyTrack(r.id, track.name, track.artist);
       });
     }
   }
@@ -615,17 +606,32 @@ async function approveReq(id) {
 }
 
 async function queueTrack(uri, id) {
+  if (!uri) return;
   showToast('Adding to queue...');
   var result = await spotifyAddToQueue(uri);
-  if (result === 'ok') {
-    showToast('🎵 Added to Spotify queue!');
-  } else if (result === 'no_device' || result === 'forbidden') {
-    showToast('⚠️ Open Spotify on any device and start playing first');
-  } else if (result === 'expired') {
-    showToast('⚠️ Spotify session expired — click Connect Spotify again');
-  } else {
-    showToast('⚠️ Could not add to queue — check Spotify is active');
-  }
+  if (result === 'ok') showToast('🎵 Added to Spotify queue!');
+  else if (result === 'no_device' || result === 'forbidden') showToast('⚠️ Open Spotify and start playing first');
+  else if (result === 'expired') showToast('⚠️ Spotify session expired — reconnect');
+  else showToast('⚠️ Could not add to queue');
+}
+
+async function queueSpotifyTrack(reqId, song, artist) {
+  if (!spotifyToken) { showToast('⚠️ Connect Spotify first to queue tracks'); return; }
+  showToast('Finding on Spotify...');
+  try {
+    var q = encodeURIComponent(song + (artist ? ' ' + artist : ''));
+    var res = await fetch('https://api.spotify.com/v1/search?q=' + q + '&type=track&limit=1', {
+      headers: { 'Authorization': 'Bearer ' + spotifyToken }
+    });
+    if (res.status === 403) { showToast('⚠️ Spotify search unavailable for this app plan'); return; }
+    if (!res.ok) { showToast('⚠️ Spotify search failed'); return; }
+    var data = await res.json();
+    if (!data.tracks || !data.tracks.items.length) { showToast('⚠️ Track not found on Spotify'); return; }
+    var result = await spotifyAddToQueue(data.tracks.items[0].uri);
+    if (result === 'ok') showToast('🎵 Added to Spotify queue: ' + song);
+    else if (result === 'no_device' || result === 'forbidden') showToast('⚠️ Open Spotify and start playing first');
+    else showToast('⚠️ Could not queue — check Spotify is active');
+  } catch(e) { showToast('⚠️ Queue error: ' + e.message); }
 }
 
 async function markPlaying(id) {
@@ -666,8 +672,8 @@ function renderDisplay() {
     tp.className = 'np-type '+(playing.type||'music');
     s.style.display = 'block'; a.style.display = playing.artist?'block':'none'; tp.style.display = 'block'; e.style.display = 'none';
     var cached = spotifyCache[playing.id];
-    if (cached && cached !== 'searching' && cached.album && cached.album.images[0]) {
-      art.src = cached.album.images[0].url; art.style.display = 'block';
+    if (cached && cached !== 'searching' && cached.coverUrl) {
+      art.src = cached.coverUrl; art.style.display = 'block';
     } else { art.style.display = 'none'; }
   } else {
     s.style.display = 'none'; a.style.display = 'none'; tp.style.display = 'none'; e.style.display = 'block'; art.style.display = 'none';
@@ -678,7 +684,7 @@ function renderDisplay() {
     var sub = (r.artist||'')+(r.fan_name?' · from '+r.fan_name:'');
     if (r.type==='karaoke'&&r.performer) sub='Performer: '+r.performer;
     var cached = spotifyCache[r.id];
-    var artUrl = (cached && cached !== 'searching' && cached.album && cached.album.images[0]) ? cached.album.images[0].url : '';
+    var artUrl = (cached && cached !== 'searching' && cached.coverUrl) ? cached.coverUrl : '';
     return '<div class="q-item"><div class="q-num">'+(i+1)+'</div>'
       +(artUrl?'<img class="q-art" src="'+artUrl+'" alt="">':'')
       +'<div style="min-width:0;flex:1"><div class="q-song">'+esc(r.song)+'</div><div class="q-sub">'+esc(sub)+'</div></div>'
@@ -690,7 +696,7 @@ function openFullscreen() {
   var v = getV();
   var playing = requests.find(r => r.status === 'playing');
   var queue = requests.filter(r => r.status === 'approved');
-  var playingArt = playing && spotifyCache[playing.id] && spotifyCache[playing.id].album ? spotifyCache[playing.id].album.images[0].url : '';
+  var playingArt = playing && spotifyCache[playing.id] && spotifyCache[playing.id].coverUrl ? spotifyCache[playing.id].coverUrl : '';
   var nowHtml = playing
     ? '<div style="display:flex;align-items:center;gap:2vw">'
       +(playingArt?'<img src="'+playingArt+'" style="width:8vw;height:8vw;border-radius:1vw;object-fit:cover">':'')
@@ -701,7 +707,7 @@ function openFullscreen() {
     : '<div style="font-size:2vw;color:#2e2c44;font-style:italic">Nothing playing yet</div>';
   var qHtml = queue.slice(0,6).map(function(r,i){
     var sub=(r.artist?esc(r.artist)+' · ':'')+(r.type==='karaoke'&&r.performer?'Performer: '+esc(r.performer):'from '+(r.fan_name||'Anonymous'));
-    var qArt = spotifyCache[r.id] && spotifyCache[r.id].album ? spotifyCache[r.id].album.images[0].url : '';
+    var qArt = spotifyCache[r.id] && spotifyCache[r.id].coverUrl ? spotifyCache[r.id].coverUrl : '';
     return '<div style="display:flex;gap:1rem;align-items:center;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:8px;padding:.75rem 1.25rem;margin-bottom:.5rem">'
       +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;color:#2a2840;min-width:24px">'+(i+1)+'</div>'
       +(qArt?'<img src="'+qArt+'" style="width:36px;height:36px;border-radius:4px;object-fit:cover">':'')
@@ -745,7 +751,7 @@ async function loadRequests() {
     requests = res.data;
     renderBoard();
     renderDisplay();
-    if (spotifyToken) searchAllApproved(); // only search if we have a valid token
+    searchAllApproved(); // uses MusicBrainz — no token needed
   }
 }
 
