@@ -315,52 +315,68 @@ function spotifyLogout() {
 }
 
 async function checkSpotifyCallback() {
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get('code');
+
+  if (code) {
+    // Fresh redirect from Spotify — clear any stale token and do clean exchange
+    sessionStorage.removeItem('spotify_token');
+    sessionStorage.removeItem('spotify_expires');
+    var verifier = sessionStorage.getItem('spotify_verifier');
+    if (!verifier) {
+      console.warn('Spotify: verifier missing — try connecting again');
+      history.replaceState(null, '', window.location.pathname);
+      return;
+    }
+    try {
+      var body = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: SPOTIFY_REDIRECT,
+        client_id: SPOTIFY_CLIENT_ID,
+        code_verifier: verifier
+      });
+      console.log('Exchanging code for token, redirect_uri:', SPOTIFY_REDIRECT);
+      var res = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString()
+      });
+      console.log('Token exchange status:', res.status);
+      var data = await res.json();
+      console.log('Token response:', JSON.stringify(data).substring(0, 300));
+      history.replaceState(null, '', window.location.pathname);
+      if (data.access_token) {
+        spotifyToken = data.access_token;
+        var expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+        sessionStorage.setItem('spotify_token', spotifyToken);
+        sessionStorage.setItem('spotify_expires', expiresAt.toString());
+        sessionStorage.removeItem('spotify_verifier');
+        updateSpotifyUI();
+        showToast('✅ Spotify connected!');
+        go('board');
+        searchAllApproved();
+      } else {
+        showToast('⚠️ Spotify login failed: ' + (data.error_description || data.error || 'unknown'));
+      }
+    } catch(e) {
+      console.error('Token exchange error:', e);
+      showToast('⚠️ Spotify connection error');
+    }
+    return;
+  }
+
+  // No code in URL — check saved token
   var saved = sessionStorage.getItem('spotify_token');
   var expires = sessionStorage.getItem('spotify_expires');
   if (saved && expires && Date.now() < parseInt(expires)) {
     spotifyToken = saved;
+    console.log('Spotify: loaded saved token,', Math.round((parseInt(expires) - Date.now()) / 60000), 'mins left');
     updateSpotifyUI();
-    return;
   } else if (saved) {
-    // Token exists but is expired — clear it
-    console.log('Spotify token expired, clearing');
+    console.log('Spotify: saved token expired, clearing');
     sessionStorage.removeItem('spotify_token');
     sessionStorage.removeItem('spotify_expires');
-  }
-  var params = new URLSearchParams(window.location.search);
-  var code = params.get('code');
-  if (!code) return;
-  var verifier = sessionStorage.getItem('spotify_verifier');
-  if (!verifier) return;
-  try {
-    var body = new URLSearchParams({
-      grant_type: 'authorization_code',
-      code: code,
-      redirect_uri: SPOTIFY_REDIRECT,
-      client_id: SPOTIFY_CLIENT_ID,
-      code_verifier: verifier
-    });
-    var res = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body.toString()
-    });
-    var data = await res.json();
-    if (data.access_token) {
-      spotifyToken = data.access_token;
-      var expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
-      sessionStorage.setItem('spotify_token', spotifyToken);
-      sessionStorage.setItem('spotify_expires', expiresAt.toString());
-      history.replaceState(null, '', window.location.pathname);
-      updateSpotifyUI();
-      showToast('✅ Spotify connected!');
-      go('board');
-      searchAllApproved();
-    } else {
-      showToast('⚠️ Spotify login failed: ' + (data.error_description || data.error));
-    }
-  } catch(e) {
-    showToast('⚠️ Spotify connection error');
   }
 }
 
