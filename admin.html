@@ -67,6 +67,18 @@
   .qr-wrap { background: #fff; border-radius: 12px; padding: 1rem; width: fit-content; margin: 0 auto 1.25rem; }
   .url-box { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .65rem 1rem; font-size: .78rem; color: #6b6880; font-family: monospace; word-break: break-all; margin-bottom: .75rem; }
 
+
+  /* LIVE TOGGLE */
+  .live-toggle { display: flex; align-items: center; gap: .6rem; background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .35rem .35rem .35rem .9rem; cursor: pointer; transition: all .25s; user-select: none; }
+  .live-toggle.is-live { background: #0d2e1a; border-color: rgba(34,197,94,.4); }
+  .live-toggle.is-closed { background: #2e0d0d; border-color: rgba(226,75,74,.4); }
+  .live-toggle-label { font-size: .72rem; font-weight: 500; letter-spacing: 1px; color: #9997b0; transition: color .25s; }
+  .live-toggle.is-live .live-toggle-label { color: #22c55e; }
+  .live-toggle.is-closed .live-toggle-label { color: #e24b4a; }
+  .live-toggle-pip { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .8rem; transition: background .25s; background: #1a1830; flex-shrink: 0; }
+  .live-toggle.is-live .live-toggle-pip { background: #22c55e; }
+  .live-toggle.is-closed .live-toggle-pip { background: #e24b4a; }
+
   /* FILTER TABS */
   .filter-tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
   .ftab { background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .28rem .9rem; font-size: .72rem; font-weight: 500; color: #9997b0; cursor: pointer; transition: all .2s; }
@@ -199,6 +211,10 @@
     <div class="board-title">Requests</div>
     <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
       <div class="live-badge"><div class="dot-live"></div><span id="req-count">0</span></div>
+      <div class="live-toggle" id="live-toggle" onclick="toggleLive()">
+        <span class="live-toggle-label" id="live-toggle-label">Requests closed</span>
+        <div class="live-toggle-pip" id="live-toggle-pip">✕</div>
+      </div>
       <button class="btn btn-outline btn-sm" onclick="clearPlayed()">Clear played</button>
     </div>
   </div>
@@ -472,6 +488,40 @@ async function searchAllApproved() {
     if (!spotifyToken) break; // stop if token was cleared mid-loop
     await searchAndCacheTrack(r);
   }
+}
+
+
+// ── LIVE STATUS ───────────────────────────────────────────────
+var isLive = false;
+
+async function loadLiveStatus() {
+  try {
+    var res = await sb.from('settings').select('value').eq('key', 'requests_live').single();
+    if (res.data) {
+      isLive = res.data.value === 'true';
+      updateLiveToggleUI();
+    }
+  } catch(e) {
+    // Settings table may not exist yet — create it
+    await sb.from('settings').upsert({ key: 'requests_live', value: 'false' });
+  }
+}
+
+async function toggleLive() {
+  isLive = !isLive;
+  await sb.from('settings').upsert({ key: 'requests_live', value: isLive ? 'true' : 'false' });
+  updateLiveToggleUI();
+  showToast(isLive ? '🟢 Requests are now OPEN' : '🔴 Requests are now CLOSED');
+}
+
+function updateLiveToggleUI() {
+  var toggle = document.getElementById('live-toggle');
+  var label = document.getElementById('live-toggle-label');
+  var pip = document.getElementById('live-toggle-pip');
+  if (!toggle) return;
+  toggle.className = 'live-toggle ' + (isLive ? 'is-live' : 'is-closed');
+  label.textContent = isLive ? 'Requests open' : 'Requests closed';
+  pip.textContent = isLive ? '✓' : '✕';
 }
 
 // ── CORE ──────────────────────────────────────────────────────
@@ -758,11 +808,12 @@ function showToast(msg) {
 
 // Init — sequence matters: check spotify first, then load requests
 async function init() {
-  await checkSpotifyCallback(); // wait for token exchange to complete before anything else
+  await checkSpotifyCallback();
   sync();
-  await loadRequests();
+  await Promise.all([loadRequests(), loadLiveStatus()]);
   initRealtime();
   setInterval(loadRequests, 60000);
+  setInterval(loadLiveStatus, 30000); // keep live status in sync
 }
 init();
 </script>

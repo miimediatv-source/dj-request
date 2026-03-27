@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Mii-Music · Song Request</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
   :root { color-scheme: dark; }
   html { background: #0a0a0f; }
@@ -19,6 +19,17 @@
     display: flex;
     flex-direction: column;
   }
+
+
+  .status-banner { display: none; width: 100%; padding: .85rem 1.5rem; text-align: center; font-size: .85rem; font-weight: 500; letter-spacing: .5px; position: relative; z-index: 1; }
+  .status-banner.open { background: rgba(34,197,94,.12); color: #22c55e; border-bottom: 1px solid rgba(34,197,94,.2); display: block; }
+  .status-banner.closed { background: rgba(226,75,74,.1); color: #f87171; border-bottom: 1px solid rgba(226,75,74,.2); display: block; }
+  .type-card.disabled { opacity: .4; pointer-events: none; cursor: not-allowed; }
+  .closed-overlay { display: none; text-align: center; padding: 2rem 1.5rem; }
+  .closed-overlay.show { display: block; }
+  .closed-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .closed-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; color: #f87171; margin-bottom: .5rem; }
+  .closed-msg { font-size: .88rem; color: #9997b0; }
 
   /* BACKGROUND GLOW */
   .bg-glow {
@@ -317,6 +328,7 @@
 </style>
 </head>
 <body>
+<div class="status-banner" id="status-banner"></div>
 <div class="bg-glow"></div>
 <div class="page">
 
@@ -330,7 +342,12 @@
       <div class="dj-name" id="l-djname">Mii-Music</div>
       <div class="event-name" id="l-venue"></div>
       <p class="landing-prompt">What do you want to hear?</p>
-      <div class="type-grid">
+      <div class="closed-overlay" id="closed-overlay">
+        <div class="closed-icon">🎵</div>
+        <div class="closed-title">Requests Closed</div>
+        <div class="closed-msg" id="closed-msg">The DJ isn't taking requests right now.<br>Check back soon!</div>
+      </div>
+      <div class="type-grid" id="type-grid">
         <div class="type-card music" onclick="openForm('music')">
           <span class="type-emoji">🎵</span>
           <span class="type-label">Song</span>
@@ -387,6 +404,53 @@
 
 <div class="footer">Powered by <span>Mii-Music</span></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+
+  // ── LIVE STATUS ────────────────────────────────────────────
+  var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
+  var sbFan = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var requestsLive = true; // default open until we know otherwise
+
+  async function checkLiveStatus() {
+    try {
+      var res = await sbFan.from('settings').select('value').eq('key', 'requests_live').single();
+      if (res.data) {
+        requestsLive = res.data.value === 'true';
+        updateLiveBanner();
+      }
+    } catch(e) { /* settings not set yet — assume open */ }
+  }
+
+  function updateLiveBanner() {
+    var banner = document.getElementById('status-banner');
+    var overlay = document.getElementById('closed-overlay');
+    var grid = document.getElementById('type-grid');
+    if (requestsLive) {
+      banner.className = 'status-banner open';
+      banner.textContent = '🟢 Requests are open — send yours below!';
+      if (overlay) overlay.classList.remove('show');
+      if (grid) grid.style.display = 'grid';
+    } else {
+      banner.className = 'status-banner closed';
+      banner.textContent = '🔴 Requests are currently closed';
+      if (overlay) overlay.classList.add('show');
+      if (grid) grid.style.display = 'none';
+    }
+  }
+
+  // Subscribe to live status changes
+  sbFan.channel('settings-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.requests_live' }, function(payload) {
+      if (payload.new) {
+        requestsLive = payload.new.value === 'true';
+        updateLiveBanner();
+      }
+    }).subscribe();
+
+  checkLiveStatus();
+
+</script>
 <script>
   var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
