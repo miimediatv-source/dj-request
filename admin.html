@@ -8,11 +8,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+  :root { color-scheme: dark; }
+  html { background: #0a0a0f; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: #0a0a0f; color: #f0eef8; min-height: 100vh; }
 
   .nav { display: flex; border-bottom: 1px solid #1e1e2e; background: #0a0a0f; position: sticky; top: 0; z-index: 10; }
-  .nav-tab { flex: 1; padding: .85rem .25rem; text-align: center; font-size: .62rem; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: #44425a; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s; }
+  .nav-tab { flex: 1; padding: .85rem .25rem; text-align: center; font-size: .62rem; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: #9997b0; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s; }
   .nav-tab.active { color: #a78be8; border-bottom-color: #6c3fc5; }
 
   .hero { padding: 2rem 2rem 1.75rem; text-align: center; border-bottom: 1px solid #1e1e2e; }
@@ -20,12 +22,12 @@
   .vinyl::after { content: ''; width: 14px; height: 14px; background: #6c3fc5; border-radius: 50%; }
   .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; color: #fff; line-height: 1; }
   .hero h1 span { color: #a78be8; }
-  .hero-sub { font-size: .7rem; color: #44425a; letter-spacing: 1.5px; text-transform: uppercase; margin-top: .3rem; }
+  .hero-sub { font-size: .7rem; color: #9997b0; letter-spacing: 1.5px; text-transform: uppercase; margin-top: .3rem; }
 
   .panel { display: none; padding: 1.75rem; max-width: 580px; margin: 0 auto; }
   .panel.active { display: block; }
 
-  .label { font-size: .66rem; letter-spacing: 2px; text-transform: uppercase; color: #44425a; margin-bottom: .55rem; }
+  .label { font-size: .66rem; letter-spacing: 2px; text-transform: uppercase; color: #9997b0; margin-bottom: .55rem; }
   .field { margin-bottom: 1.3rem; }
   input[type=text], input[type=tel] { width: 100%; background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .75rem 1rem; color: #f0eef8; font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none; transition: border-color .2s; }
   input:focus { border-color: #6c3fc5; }
@@ -54,8 +56,8 @@
   .spotify-logo { width: 28px; height: 28px; flex-shrink: 0; }
   .spotify-status { font-size: .82rem; font-weight: 500; }
   .spotify-status.ok { color: #1db954; }
-  .spotify-status.off { color: #4a4860; }
-  .spotify-sub { font-size: .7rem; color: #3a3850; margin-top: 1px; }
+  .spotify-status.off { color: #9997b0; }
+  .spotify-sub { font-size: .7rem; color: #7a7890; margin-top: 1px; }
   .spotify-btn { background: #1db954; border: none; border-radius: 6px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 500; padding: .45rem 1rem; cursor: pointer; white-space: nowrap; transition: background .2s; flex-shrink: 0; }
   .spotify-btn:hover { background: #1ed760; }
   .spotify-btn.disconnect { background: transparent; border: 1px solid #2a2840; color: #6b6880; }
@@ -67,7 +69,7 @@
 
   /* FILTER TABS */
   .filter-tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-  .ftab { background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .28rem .9rem; font-size: .72rem; font-weight: 500; color: #5c5a75; cursor: pointer; transition: all .2s; }
+  .ftab { background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .28rem .9rem; font-size: .72rem; font-weight: 500; color: #9997b0; cursor: pointer; transition: all .2s; }
   .ftab.active { background: #16122a; border-color: #6c3fc5; color: #a78be8; }
   .ftab.karaoke-tab.active { background: #1a0e1a; border-color: #ec4899; color: #f472b6; }
   .ftab.pending-tab.active { background: #1a1200; border-color: #f59e0b; color: #fbbf24; }
@@ -77,7 +79,7 @@
   .board-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: #fff; }
 
   .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: .68rem; color: #5c5a75; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: .68rem; color: #9997b0; }
   .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
   .ld-pending { background: #f59e0b; } .ld-approved { background: #22c55e; } .ld-playing { background: #6c3fc5; } .ld-played { background: #3a3850; }
 
@@ -94,7 +96,7 @@
   .pill-pending { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
   .pill-approved { background: rgba(34,197,94,.12); color: #22c55e; border: 1px solid rgba(34,197,94,.2); }
   .pill-playing { background: rgba(108,63,197,.15); color: #a78be8; border: 1px solid rgba(108,63,197,.25); }
-  .pill-played { background: rgba(255,255,255,.05); color: #44425a; border: 1px solid rgba(255,255,255,.08); }
+  .pill-played { background: rgba(255,255,255,.05); color: #9997b0; border: 1px solid rgba(255,255,255,.08); }
 
   .type-pip { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; margin-top: 2px; }
   .pip-music { background: rgba(108,63,197,.15); } .pip-karaoke { background: rgba(236,72,153,.15); }
@@ -102,7 +104,7 @@
   .req-info { flex: 1; min-width: 0; }
   .req-song { font-weight: 500; font-size: .93rem; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .req-artist { font-size: .76rem; color: #6b6880; margin-top: 2px; }
-  .req-meta { font-size: .68rem; color: #3a3850; margin-top: 3px; }
+  .req-meta { font-size: .68rem; color: #7a7890; margin-top: 3px; }
 
   /* SPOTIFY TRACK PREVIEW on card */
   .spotify-track { display: flex; align-items: center; gap: .65rem; background: #0a1f0a; border: 1px solid rgba(29,185,84,.2); border-radius: 8px; padding: .55rem .75rem; margin-top: .6rem; }
@@ -110,13 +112,13 @@
   .spotify-art-hidden { display: none; }
   .spotify-track-info { flex: 1; min-width: 0; }
   .spotify-track-name { font-size: .78rem; font-weight: 500; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .spotify-track-artist { font-size: .68rem; color: #5c5a75; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .spotify-track-artist { font-size: .68rem; color: #9997b0; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .spotify-open-btn { background: #1db954; border: none; border-radius: 5px; color: #fff; font-size: .65rem; font-weight: 600; padding: .3rem .6rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .2s; letter-spacing: .3px; }
   .spotify-open-btn:hover { background: #1ed760; }
   .spotify-queue-btn { background: transparent; border: 1px solid rgba(29,185,84,.3); border-radius: 5px; color: #1db954; font-size: .65rem; font-weight: 500; padding: .3rem .6rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all .2s; margin-left: .3rem; }
   .spotify-queue-btn:hover { background: rgba(29,185,84,.1); }
-  .spotify-searching { font-size: .72rem; color: #3a5a3a; font-style: italic; padding: .4rem 0; }
-  .spotify-not-found { font-size: .72rem; color: #3a3850; padding: .4rem 0; }
+  .spotify-searching { font-size: .72rem; color: #5a9a5a; font-style: italic; padding: .4rem 0; }
+  .spotify-not-found { font-size: .72rem; color: #7a7890; padding: .4rem 0; }
 
   .req-actions { display: flex; gap: .35rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; max-width: 72px; }
   .icon-btn { background: #1a1830; border: 1px solid #2a2840; border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; transition: all .2s; color: #9997b0; }
@@ -125,30 +127,30 @@
   .icon-btn.done:hover { background: #1a1a0d; border-color: #6b7280; color: #9ca3af; }
   .icon-btn.del:hover { background: #2e0d0d; border-color: #e24b4a; color: #e24b4a; }
 
-  .empty-state { text-align: center; padding: 3rem 1rem; color: #2e2c44; }
+  .empty-state { text-align: center; padding: 3rem 1rem; color: #6b6880; }
   .empty-icon { font-size: 2.5rem; margin-bottom: .6rem; opacity: .5; }
   .empty-txt { font-size: .82rem; }
 
   /* DISPLAY */
   .display-screen { background: #06060f; border: 1px solid #1e1e2e; border-radius: 16px; padding: 2rem; min-height: 380px; }
-  .np-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .5rem; }
+  .np-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #7a7890; margin-bottom: .5rem; }
   .np-song { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; color: #fff; line-height: 1.1; }
   .np-artist { font-size: .9rem; color: #a78be8; margin-top: .25rem; }
   .np-art { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; display: none; }
   .np-type { font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; margin-top: .4rem; }
   .np-type.karaoke { color: #f472b6; } .np-type.music { color: #a78be8; }
-  .np-empty { font-size: .88rem; color: #2e2c44; font-style: italic; }
-  .queue-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #3a3850; margin-bottom: .75rem; }
+  .np-empty { font-size: .88rem; color: #6b6880; font-style: italic; }
+  .queue-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #7a7890; margin-bottom: .75rem; }
   .q-item { display: flex; align-items: center; gap: .8rem; background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 8px; padding: .6rem .9rem; margin-bottom: .45rem; }
-  .q-num { font-family: 'Bebas Neue', sans-serif; font-size: .95rem; color: #2a2840; min-width: 18px; }
+  .q-num { font-family: 'Bebas Neue', sans-serif; font-size: .95rem; color: #6b6880; min-width: 18px; }
   .q-art { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
   .q-song { font-size: .82rem; font-weight: 500; color: #d0ceea; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .q-sub { font-size: .7rem; color: #3a3850; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .q-sub { font-size: .7rem; color: #9997b0; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .q-pip { font-size: .75rem; margin-left: auto; flex-shrink: 0; }
 
   .fullscreen-btn { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; color: #6b6880; font-family: 'DM Sans', sans-serif; font-size: .75rem; padding: .45rem .9rem; cursor: pointer; transition: border-color .2s; }
   .fullscreen-btn:hover { border-color: #6c3fc5; color: #a78be8; }
-  .display-hint { font-size: .68rem; color: #2a2840; text-align: center; margin-top: .75rem; }
+  .display-hint { font-size: .68rem; color: #8885a0; text-align: center; margin-top: .75rem; }
 
   .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1830; border: 1px solid #2a2840; border-radius: 8px; padding: .6rem 1.25rem; font-size: .8rem; color: #a78be8; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; max-width: 90vw; }
   .toast.show { opacity: 1; }
@@ -184,7 +186,7 @@
   </div>
   <div class="label" style="text-align:center;margin-bottom:.75rem">Fan request QR code</div>
   <div class="qr-wrap"><div id="qr-box"></div></div>
-  <div style="text-align:center;font-size:.65rem;color:#3a3850;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.25rem">Fans scan this to request a song or karaoke</div>
+  <div style="text-align:center;font-size:.65rem;color:#8885a0;letter-spacing:1px;text-transform:uppercase;margin-bottom:1.25rem">Fans scan this to request a song or karaoke</div>
   <div class="label">Fan link</div>
   <div class="url-box" id="fan-url-display">Set up your details first</div>
   <button class="btn btn-purple" onclick="copyFanLink()">Copy Fan Link</button>
@@ -253,7 +255,7 @@
     </div>
     <div class="divider" style="margin:.85rem 0 1rem"></div>
     <div class="queue-label">Up next — approved requests</div>
-    <div id="queue-list"><div style="font-size:.8rem;color:#2e2c44;font-style:italic">No approved requests yet</div></div>
+    <div id="queue-list"><div style="font-size:.8rem;color:#6b6880;font-style:italic">No approved requests yet</div></div>
   </div>
   <div class="display-hint">Only approved requests appear here. Approve in the Requests tab.</div>
 </div>
@@ -671,7 +673,7 @@ function renderDisplay() {
     s.style.display = 'none'; a.style.display = 'none'; tp.style.display = 'none'; e.style.display = 'block'; art.style.display = 'none';
   }
   var ql = document.getElementById('queue-list');
-  if (!queue.length) { ql.innerHTML = '<div style="font-size:.8rem;color:#2e2c44;font-style:italic">No approved requests yet</div>'; return; }
+  if (!queue.length) { ql.innerHTML = '<div style="font-size:.8rem;color:#6b6880;font-style:italic">No approved requests yet</div>'; return; }
   ql.innerHTML = queue.slice(0,6).map(function(r,i){
     var sub = (r.artist||'')+(r.fan_name?' · from '+r.fan_name:'');
     if (r.type==='karaoke'&&r.performer) sub='Performer: '+r.performer;
@@ -696,25 +698,25 @@ function openFullscreen() {
       +(playing.artist?'<div style="font-size:2vw;color:#a78be8;margin-top:.3rem">'+esc(playing.artist)+'</div>':'')
       +'<div style="font-size:1vw;letter-spacing:2px;text-transform:uppercase;color:'+(playing.type==='karaoke'?'#f472b6':'#6c3fc5')+';margin-top:.4rem">'+(playing.type==='karaoke'?'🎤 Karaoke':'🎵 Song Request')+'</div>'
       +'</div></div>'
-    : '<div style="font-size:2vw;color:#2e2c44;font-style:italic">Nothing playing yet</div>';
+    : '<div style="font-size:2vw;color:#6b6880;font-style:italic">Nothing playing yet</div>';
   var qHtml = queue.slice(0,6).map(function(r,i){
     var sub=(r.artist?esc(r.artist)+' · ':'')+(r.type==='karaoke'&&r.performer?'Performer: '+esc(r.performer):'from '+(r.fan_name||'Anonymous'));
     var qArt = spotifyCache[r.id] && spotifyCache[r.id].coverUrl ? spotifyCache[r.id].coverUrl : '';
     return '<div style="display:flex;gap:1rem;align-items:center;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:8px;padding:.75rem 1.25rem;margin-bottom:.5rem">'
-      +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;color:#2a2840;min-width:24px">'+(i+1)+'</div>'
+      +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.6rem;color:#6b6880;min-width:24px">'+(i+1)+'</div>'
       +(qArt?'<img src="'+qArt+'" style="width:36px;height:36px;border-radius:4px;object-fit:cover">':'')
       +'<div style="flex:1;min-width:0"><div style="font-size:1.1rem;font-weight:500;color:#d0ceea">'+esc(r.song)+'</div>'
-      +'<div style="font-size:.82rem;color:#3a3850;margin-top:2px">'+sub+'</div></div>'
+      +'<div style="font-size:.82rem;color:#8885a0;margin-top:2px">'+sub+'</div></div>'
       +'<div style="font-size:1.1rem">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
-  }).join('') || '<div style="font-size:1rem;color:#2e2c44;font-style:italic;padding:.5rem 0">No approved requests yet</div>';
+  }).join('') || '<div style="font-size:1rem;color:#6b6880;font-style:italic;padding:.5rem 0">No approved requests yet</div>';
   var w = window.open('','_blank','menubar=no,toolbar=no,location=no,status=no');
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#06060f;color:#f0eef8;font-family:DM Sans,sans-serif;min-height:100vh;padding:4vw}</style></head><body>'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3vw">'
-    +'<div><div style="font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:.6rem">Now playing</div>'+nowHtml+'</div>'
-    +'<div style="text-align:right"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:#2e2c44">'+esc(v.name)+'</div>'
-    +'<div style="font-size:.8rem;color:#2e2c44;margin-top:3px">'+esc(v.event)+'</div></div></div>'
+    +'<div><div style="font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:#8885a0;margin-bottom:.6rem">Now playing</div>'+nowHtml+'</div>'
+    +'<div style="text-align:right"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:#c4c0e0">'+esc(v.name)+'</div>'
+    +'<div style="font-size:.8rem;color:#9997b0;margin-top:3px">'+esc(v.event)+'</div></div></div>'
     +'<hr style="border:none;border-top:1px solid #1e1e2e;margin-bottom:2.5vw">'
-    +'<div style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:#3a3850;margin-bottom:1rem">Up next</div>'
+    +'<div style="font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:#8885a0;margin-bottom:1rem">Up next</div>'
     +qHtml+'</body></html>');
   w.document.close();
 }
