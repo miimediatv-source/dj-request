@@ -420,16 +420,15 @@
 
 <div class="footer">Powered by <span>Mii-Music</span></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
   // ── LIVE STATUS ────────────────────────────────────────────
   var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
-  var sbFan = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function checkLiveStatus() {
     try {
-      var res = await sbFan.from('settings').select('value').eq('key', 'requests_live').single();
+      var res = await sb.from('settings').select('value').eq('key', 'requests_live').single();
       if (res.data) {
         requestsLive = res.data.value === 'true';
         updateLiveBanner();
@@ -464,31 +463,22 @@
     }
   }
 
-  // Subscribe to live status changes
-  sbFan.channel('settings-live')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.requests_live' }, function(payload) {
-      if (payload.new) {
-        requestsLive = payload.new.value === 'true';
-        updateLiveBanner();
-      }
-    }).subscribe();
-
-  checkLiveStatus();
-
-</script>
-<script>
   var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  var requestsLive = true; // single source of truth — updated by checkLiveStatus()
 
   var currentType = 'music';
-  var requestsLive = true; // default open — updated by checkLiveStatus()
   var params = new URLSearchParams(window.location.search);
   var djName = params.get('dj') || 'Mii-Music';
   var eventName = params.get('event') || 'Live Tonight';
   var venue = params.get('venue') || '';
 
   // Set landing info
+  // Init live status after sb client is ready
+  checkLiveStatus();
+  sb.channel('settings-ch').on('postgres_changes', { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.requests_live' }, function(p) { if (p.new) { requestsLive = p.new.value === 'true'; updateLiveBanner(); } }).subscribe();
+
   document.getElementById('l-djname').textContent = djName;
   document.getElementById('l-event').textContent = eventName;
   document.getElementById('l-venue').textContent = venue;
