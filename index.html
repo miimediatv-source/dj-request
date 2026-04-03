@@ -422,18 +422,33 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // ── LIVE STATUS ────────────────────────────────────────────
+  // ── CONFIG ────────────────────────────────────────────────
   var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  // ── STATE ─────────────────────────────────────────────────
+  var requestsLive = false; // default CLOSED until confirmed open from DB
+  var currentType = 'music';
+  var params = new URLSearchParams(window.location.search);
+  var djName = params.get('dj') || 'Mii-Music';
+  var eventName = params.get('event') || 'Live Tonight';
+  var venue = params.get('venue') || '';
+
+  // ── LIVE STATUS ───────────────────────────────────────────
   async function checkLiveStatus() {
     try {
       var res = await sb.from('settings').select('value').eq('key', 'requests_live').single();
       if (res.data) {
         requestsLive = res.data.value === 'true';
-        updateLiveBanner();
+      } else {
+        requestsLive = false;
       }
-    } catch(e) { /* settings not set yet — assume open */ }
+    } catch(e) {
+      requestsLive = false; // if we can't check, stay closed
+    }
+    updateLiveBanner();
+    return requestsLive;
   }
 
   function updateLiveBanner() {
@@ -441,8 +456,6 @@
     var overlay = document.getElementById('closed-overlay');
     var grid = document.getElementById('type-grid');
     var chip = document.querySelector('.event-chip');
-    var djName = document.getElementById('l-djname');
-    var venueName = document.getElementById('l-venue');
     var prompt = document.querySelector('.landing-prompt');
     if (requestsLive) {
       banner.className = 'status-banner open';
@@ -458,52 +471,38 @@
       if (grid) grid.style.display = 'none';
       if (chip) chip.style.display = 'none';
       if (prompt) prompt.style.display = 'none';
-      // Make sure we're on the landing screen
       show('screen-landing');
     }
   }
 
-  var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
-  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  var requestsLive = true; // single source of truth — updated by checkLiveStatus()
+  // Subscribe to real-time live status changes
+  sb.channel('settings-live')
+    .on('postgres_changes', {
+      event: '*', schema: 'public', table: 'settings',
+      filter: 'key=eq.requests_live'
+    }, function(payload) {
+      if (payload.new) {
+        requestsLive = payload.new.value === 'true';
+        updateLiveBanner();
+      }
+    }).subscribe();
 
-  var currentType = 'music';
-  var params = new URLSearchParams(window.location.search);
-  var djName = params.get('dj') || 'Mii-Music';
-  var eventName = params.get('event') || 'Live Tonight';
-  var venue = params.get('venue') || '';
-
-  // Set landing info
-  // Init live status after sb client is ready
-  checkLiveStatus();
-  sb.channel('settings-ch').on('postgres_changes', { event: '*', schema: 'public', table: 'settings', filter: 'key=eq.requests_live' }, function(p) { if (p.new) { requestsLive = p.new.value === 'true'; updateLiveBanner(); } }).subscribe();
-
-  document.getElementById('l-djname').textContent = djName;
-  document.getElementById('l-event').textContent = eventName;
-  document.getElementById('l-venue').textContent = venue;
-  document.title = djName + ' · Song Request';
-
+  // ── SCREEN NAVIGATION ─────────────────────────────────────
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
   }
 
   function openForm(type) {
-    // Double-check live status before showing form
-    if (!requestsLive) {
-      show('screen-landing');
-      return;
-    }
+    if (!requestsLive) { show('screen-landing'); return; }
     currentType = type;
     var isKaraoke = type === 'karaoke';
     var badge = document.getElementById('form-badge');
     badge.textContent = isKaraoke ? '🎤 Karaoke Request' : '🎵 Song Request';
     badge.className = 'form-type-badge ' + type;
     document.getElementById('f-performer-wrap').style.display = isKaraoke ? 'block' : 'none';
-    var inputs = document.querySelectorAll('#screen-form input');
-    inputs.forEach(function(inp) {
+    document.querySelectorAll('#screen-form input').forEach(function(inp) {
       inp.className = isKaraoke ? 'karaoke-focus' : '';
     });
     var btn = document.getElementById('submit-btn');
@@ -517,17 +516,17 @@
     document.getElementById('f-performer').value = '';
     document.getElementById('err-bar').style.display = 'none';
     show('screen-form');
-    setTimeout(function(){ document.getElementById('f-song').focus(); }, 300);
+    setTimeout(function() { document.getElementById('f-song').focus(); }, 300);
   }
 
   function goBack() { show('screen-landing'); }
   function goHome() { show('screen-landing'); }
 
+  // ── SUBMIT ────────────────────────────────────────────────
   async function submitReq() {
-    // Always do a fresh check from Supabase before submitting
-    await checkLiveStatus();
-    if (!requestsLive) {
-      updateLiveBanner();
+    // Always re-check from DB immediately before inserting
+    var live = await checkLiveStatus();
+    if (!live) {
       show('screen-landing');
       return;
     }
@@ -556,10 +555,33 @@
       document.getElementById('err-bar').style.display = 'block';
       return;
     }
+    document.getElementById('f-song').value = '';
+    document.getElementById('f-artist').value = '';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-performer').value = '';
+    var s = document.getElementById('succ');
+    s.style.display = 'block';
+    setTimeout(function() { s.style.display = 'none'; }, 3000);
+    show('screen-success');
     document.getElementById('succ-song').textContent = song;
     document.getElementById('succ-artist').textContent = artist ? 'by ' + artist : (currentType === 'karaoke' && performer ? 'Performer: ' + performer : '');
-    show('screen-success');
   }
+
+  // ── INIT ─────────────────────────────────────────────────
+  document.getElementById('l-djname').textContent = djName;
+  document.getElementById('l-event').textContent = eventName;
+  document.getElementById('l-venue').textContent = venue;
+  document.title = djName + ' · Song Request';
+
+  // Check URL params for direct fan view
+  (function() {
+    if (params.get('view') === 'fan') {
+      document.getElementById('fan-dj') && (document.getElementById('fan-dj').textContent = djName);
+    }
+  })();
+
+  // Load live status immediately on page load
+  checkLiveStatus();
 </script>
 </body>
 </html>
