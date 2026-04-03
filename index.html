@@ -23,13 +23,24 @@
 
   .status-banner { display: none; width: 100%; padding: .85rem 1.5rem; text-align: center; font-size: .85rem; font-weight: 500; letter-spacing: .5px; position: relative; z-index: 1; }
   .status-banner.open { background: rgba(34,197,94,.12); color: #22c55e; border-bottom: 1px solid rgba(34,197,94,.2); display: block; }
-  .status-banner.closed { background: rgba(226,75,74,.1); color: #f87171; border-bottom: 1px solid rgba(226,75,74,.2); display: block; }
+  .status-banner.closed { background: rgba(226,75,74,.15); color: #f87171; border-bottom: 1px solid rgba(226,75,74,.3); display: block; font-weight: 600; letter-spacing: .5px; }
   .type-card.disabled { opacity: .4; pointer-events: none; cursor: not-allowed; }
-  .closed-overlay { display: none; text-align: center; padding: 2rem 1.5rem; }
-  .closed-overlay.show { display: block; }
-  .closed-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-  .closed-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; color: #f87171; margin-bottom: .5rem; }
-  .closed-msg { font-size: .88rem; color: #9997b0; }
+  .closed-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1.5rem; flex: 1; min-height: 340px; }
+  .closed-overlay.show { display: flex; }
+  .closed-graphic { position: relative; width: 180px; height: 180px; margin: 0 auto 2rem; }
+  .closed-disc { width: 180px; height: 180px; border-radius: 50%; background: #12121c; border: 3px solid #2a2840; display: flex; align-items: center; justify-content: center; position: relative; }
+  .closed-disc::before { content: ''; position: absolute; width: 140px; height: 140px; border-radius: 50%; border: 2px dashed #2a2840; }
+  .closed-disc::after { content: ''; position: absolute; width: 24px; height: 24px; border-radius: 50%; background: #1e1e2e; border: 2px solid #2a2840; }
+  .closed-cross { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .closed-cross::before, .closed-cross::after { content: ''; position: absolute; width: 3px; height: 70px; background: #e24b4a; border-radius: 2px; }
+  .closed-cross::before { transform: rotate(45deg); }
+  .closed-cross::after { transform: rotate(-45deg); }
+  .closed-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; color: #f87171; margin-bottom: .75rem; line-height: 1; }
+  .closed-sub { font-size: 1rem; color: #9997b0; margin-bottom: .5rem; font-weight: 300; }
+  .closed-msg { font-size: .78rem; color: #5c5a75; letter-spacing: .5px; }
+  .closed-pulse { display: inline-flex; align-items: center; gap: 6px; background: rgba(226,75,74,.1); border: 1px solid rgba(226,75,74,.25); border-radius: 100px; padding: .35rem 1rem; font-size: .72rem; color: #f87171; margin-top: 1.5rem; letter-spacing: 1px; text-transform: uppercase; }
+  .closed-pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: #e24b4a; animation: closedBlink 1.5s infinite; }
+  @keyframes closedBlink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
   /* BACKGROUND GLOW */
   .bg-glow {
@@ -343,9 +354,14 @@
       <div class="event-name" id="l-venue"></div>
       <p class="landing-prompt">What do you want to hear?</p>
       <div class="closed-overlay" id="closed-overlay">
-        <div class="closed-icon">🎵</div>
-        <div class="closed-title">Requests Closed</div>
-        <div class="closed-msg" id="closed-msg">The DJ isn't taking requests right now.<br>Check back soon!</div>
+        <div class="closed-graphic">
+          <div class="closed-disc"></div>
+          <div class="closed-cross"></div>
+        </div>
+        <div class="closed-title">Requests Not<br>Available</div>
+        <div class="closed-sub">Will be available soon</div>
+        <div class="closed-msg" id="closed-msg">The DJ isn't taking requests right now</div>
+        <div class="closed-pulse"><div class="closed-pulse-dot"></div>Stand by</div>
       </div>
       <div class="type-grid" id="type-grid">
         <div class="type-card music" onclick="openForm('music')">
@@ -425,16 +441,26 @@
     var banner = document.getElementById('status-banner');
     var overlay = document.getElementById('closed-overlay');
     var grid = document.getElementById('type-grid');
+    var chip = document.querySelector('.event-chip');
+    var djName = document.getElementById('l-djname');
+    var venueName = document.getElementById('l-venue');
+    var prompt = document.querySelector('.landing-prompt');
     if (requestsLive) {
       banner.className = 'status-banner open';
       banner.textContent = '🟢 Requests are open — send yours below!';
       if (overlay) overlay.classList.remove('show');
       if (grid) grid.style.display = 'grid';
+      if (chip) chip.style.display = '';
+      if (prompt) prompt.style.display = '';
     } else {
       banner.className = 'status-banner closed';
       banner.textContent = '🔴 Requests are currently closed';
       if (overlay) overlay.classList.add('show');
       if (grid) grid.style.display = 'none';
+      if (chip) chip.style.display = 'none';
+      if (prompt) prompt.style.display = 'none';
+      // Make sure we're on the landing screen
+      show('screen-landing');
     }
   }
 
@@ -475,7 +501,11 @@
   }
 
   function openForm(type) {
-    if (!requestsLive) { return; } // extra guard — banner/overlay should already hide buttons
+    // Double-check live status before showing form
+    if (!requestsLive) {
+      show('screen-landing');
+      return;
+    }
     currentType = type;
     var isKaraoke = type === 'karaoke';
     var badge = document.getElementById('form-badge');
