@@ -410,7 +410,6 @@
   var SUPABASE_URL = 'https://jnltpobmbtnixxumibpv.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_-5kULpzuO7IJUCXqtMUVQA_NPXh66PR';
   var sbFan = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  var requestsLive = true; // default open until we know otherwise
 
   async function checkLiveStatus() {
     try {
@@ -457,6 +456,7 @@
   var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   var currentType = 'music';
+  var requestsLive = true; // default open — updated by checkLiveStatus()
   var params = new URLSearchParams(window.location.search);
   var djName = params.get('dj') || 'Mii-Music';
   var eventName = params.get('event') || 'Live Tonight';
@@ -475,6 +475,7 @@
   }
 
   function openForm(type) {
+    if (!requestsLive) { return; } // extra guard — banner/overlay should already hide buttons
     currentType = type;
     var isKaraoke = type === 'karaoke';
     var badge = document.getElementById('form-badge');
@@ -503,6 +504,13 @@
   function goHome() { show('screen-landing'); }
 
   async function submitReq() {
+    // Always do a fresh check from Supabase before submitting
+    await checkLiveStatus();
+    if (!requestsLive) {
+      updateLiveBanner();
+      show('screen-landing');
+      return;
+    }
     var song = document.getElementById('f-song').value.trim();
     var artist = document.getElementById('f-artist').value.trim();
     var name = document.getElementById('f-name').value.trim();
