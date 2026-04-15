@@ -55,7 +55,6 @@
   .ac-title { font-size: .88rem; font-weight: 500; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ac-sub { font-size: .72rem; color: #9997b0; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ac-loading { padding: .75rem 1rem; font-size: .78rem; color: #6b6880; font-style: italic; }
-  input:focus + .ac-dropdown, .ac-dropdown:hover { display: block; }
 
   /* BACKGROUND GLOW */
   .bg-glow {
@@ -453,36 +452,39 @@
     acTimers.song = setTimeout(async function() {
       acShow('song', '<div class="ac-loading">Searching...</div>');
       try {
-        // Search recordings by title
-        var q = encodeURIComponent('recording:"' + val + '"');
-        var res = await fetch('https://musicbrainz.org/ws/2/recording/?query=' + q + '&limit=6&fmt=json', {
+        var url = 'https://musicbrainz.org/ws/2/recording/?query='
+          + encodeURIComponent(val)
+          + '&limit=8&fmt=json';
+        var res = await fetch(url, {
           headers: { 'User-Agent': 'MiiMusic/1.0 (contact@miimediatv.com)' }
         });
+        if (!res.ok) { acHide('song'); return; }
         var data = await res.json();
         var items = (data.recordings || []).map(function(r) {
-          var artist = r['artist-credit'] ? r['artist-credit'].map(a => a.artist ? a.artist.name : '').join(', ') : '';
-          var release = r.releases && r.releases[0];
-          return { title: r.title, artist: artist, releaseId: release ? release.id : null };
+          var artist = r['artist-credit']
+            ? r['artist-credit'].map(function(a) { return a.artist ? a.artist.name : a.name || ''; }).join(', ')
+            : '';
+          return { title: r.title, artist: artist };
         });
         // Deduplicate by title+artist
         var seen = {};
         items = items.filter(function(i) {
-          var key = i.title.toLowerCase() + '|' + i.artist.toLowerCase();
+          var key = (i.title + i.artist).toLowerCase();
           if (seen[key]) return false;
           seen[key] = true;
           return true;
-        });
+        }).slice(0, 6);
         acResults.song = items;
         acActiveIdx.song = -1;
         if (!items.length) { acHide('song'); return; }
         acRender('song', items.map(function(item, idx) {
           return '<div class="ac-item" onmousedown="acPickSong(' + idx + ')">'
-            + '<div class="ac-art-placeholder">♪</div>'
+            + '<div class="ac-art-placeholder">&#9835;</div>'
             + '<div class="ac-info"><div class="ac-title">' + esc(item.title) + '</div>'
             + '<div class="ac-sub">' + esc(item.artist) + '</div></div></div>';
         }).join(''));
       } catch(e) { acHide('song'); }
-    }, 350);
+    }, 400);
   }
 
   async function acArtist(val) {
@@ -491,8 +493,7 @@
     acTimers.artist = setTimeout(async function() {
       acShow('artist', '<div class="ac-loading">Searching...</div>');
       try {
-        var q = encodeURIComponent('artist:"' + val + '"');
-        var res = await fetch('https://musicbrainz.org/ws/2/artist/?query=' + q + '&limit=6&fmt=json', {
+        var res = await fetch('https://musicbrainz.org/ws/2/artist/?query=' + encodeURIComponent(val) + '&limit=6&fmt=json', {
           headers: { 'User-Agent': 'MiiMusic/1.0 (contact@miimediatv.com)' }
         });
         var data = await res.json();
@@ -539,14 +540,16 @@
 
   function acShow(type, html) {
     var el = document.getElementById('ac-' + type);
+    if (!el) return;
     el.innerHTML = html;
     el.style.display = 'block';
   }
 
   function acRender(type, html) {
     var el = document.getElementById('ac-' + type);
+    if (!el) return;
     el.innerHTML = html;
-    el.style.display = 'block';
+    el.style.display = html ? 'block' : 'none';
   }
 
   function acHide(type) {
