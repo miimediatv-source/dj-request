@@ -471,15 +471,15 @@
   async function acFetchSong(val) {
     var dd = document.getElementById('ac-song');
     try {
-      var url = 'https://itunes.apple.com/search?term=' + encodeURIComponent(val) + '&entity=song&limit=8&media=music';
+      // Deezer API — has proper CORS headers, works from any browser, no key needed
+      var url = 'https://api.deezer.com/search?q=' + encodeURIComponent(val) + '&limit=8&output=json';
       var res = await fetch(url);
       if (!res.ok) { dd.style.display = 'none'; return; }
       var data = await res.json();
-      var results = data.results || [];
-      // Deduplicate by track+artist
+      var results = data.data || [];
       var seen = {};
       acSongResults = results.filter(function(r) {
-        var key = (r.trackName + r.artistName).toLowerCase();
+        var key = (r.title + r.artist.name).toLowerCase();
         if (seen[key]) return false;
         seen[key] = true;
         return true;
@@ -488,10 +488,10 @@
       if (!acSongResults.length) { dd.style.display = 'none'; return; }
       dd.innerHTML = acSongResults.map(function(r, i) {
         return '<div class="ac-item" onmousedown="acPickSong(' + i + ')">'
-          + '<img class="ac-art" src="' + r.artworkUrl60 + '" alt="">'
+          + '<img class="ac-art" src="' + r.album.cover_small + '" alt="">'
           + '<div class="ac-info">'
-          + '<div class="ac-title">' + esc(r.trackName) + '</div>'
-          + '<div class="ac-sub">' + esc(r.artistName) + ' · ' + esc(r.collectionName || '') + '</div>'
+          + '<div class="ac-title">' + esc(r.title) + '</div>'
+          + '<div class="ac-sub">' + esc(r.artist.name) + ' · ' + esc(r.album.title) + '</div>'
           + '</div></div>';
       }).join('');
       dd.style.display = 'block';
@@ -533,9 +533,9 @@
   function acPickSong(idx) {
     var item = acSongResults[idx];
     if (!item) return;
-    document.getElementById('f-song').value = item.trackName;
-    if (item.artistName && !document.getElementById('f-artist').value.trim()) {
-      document.getElementById('f-artist').value = item.artistName;
+    document.getElementById('f-song').value = item.title;
+    if (item.artist && item.artist.name && !document.getElementById('f-artist').value.trim()) {
+      document.getElementById('f-artist').value = item.artist.name;
     }
     document.getElementById('ac-song').style.display = 'none';
   }
@@ -543,7 +543,7 @@
   function acPickArtist(idx) {
     var item = acArtistResults[idx];
     if (!item) return;
-    document.getElementById('f-artist').value = item.artistName;
+    document.getElementById('f-artist').value = item.name;
     document.getElementById('ac-artist').style.display = 'none';
   }
 
