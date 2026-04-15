@@ -441,121 +441,115 @@
 <div class="footer">Powered by <span>Mii-Music</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-  // ── AUTOCOMPLETE ──────────────────────────────────────────
-  var acTimers = {};
-  var acActiveIdx = { song: -1, artist: -1 };
-  var acResults = { song: [], artist: [] };
 
-  async function acSong(val) {
-    clearTimeout(acTimers.song);
-    if (val.length < 2) { acHide('song'); return; }
-    acTimers.song = setTimeout(async function() {
-      acShow('song', '<div class="ac-loading">Searching...</div>');
-      try {
-        var url = 'https://musicbrainz.org/ws/2/recording/?query='
-          + encodeURIComponent(val)
-          + '&limit=8&fmt=json';
-        var res = await fetch(url, {
-          headers: { 'User-Agent': 'MiiMusic/1.0 (contact@miimediatv.com)' }
-        });
-        if (!res.ok) { acHide('song'); return; }
-        var data = await res.json();
-        var items = (data.recordings || []).map(function(r) {
-          var artist = r['artist-credit']
-            ? r['artist-credit'].map(function(a) { return a.artist ? a.artist.name : a.name || ''; }).join(', ')
-            : '';
-          return { title: r.title, artist: artist };
-        });
-        // Deduplicate by title+artist
-        var seen = {};
-        items = items.filter(function(i) {
-          var key = (i.title + i.artist).toLowerCase();
-          if (seen[key]) return false;
-          seen[key] = true;
-          return true;
-        }).slice(0, 6);
-        acResults.song = items;
-        acActiveIdx.song = -1;
-        if (!items.length) { acHide('song'); return; }
-        acRender('song', items.map(function(item, idx) {
-          return '<div class="ac-item" onmousedown="acPickSong(' + idx + ')">'
-            + '<div class="ac-art-placeholder">&#9835;</div>'
-            + '<div class="ac-info"><div class="ac-title">' + esc(item.title) + '</div>'
-            + '<div class="ac-sub">' + esc(item.artist) + '</div></div></div>';
-        }).join(''));
-      } catch(e) { acHide('song'); }
-    }, 400);
+  // ── AUTOCOMPLETE ──────────────────────────────────────────
+  var acTimer = null;
+  var acArtistTimer = null;
+  var acSongResults = [];
+  var acArtistResults = [];
+  var acSongIdx = -1;
+  var acArtistIdx = -1;
+
+  function acSong(val) {
+    clearTimeout(acTimer);
+    var dd = document.getElementById('ac-song');
+    if (!val || val.length < 2) { dd.style.display = 'none'; return; }
+    dd.innerHTML = '<div class="ac-loading">Searching...</div>';
+    dd.style.display = 'block';
+    acTimer = setTimeout(function() { acFetchSong(val); }, 400);
   }
 
-  async function acArtist(val) {
-    clearTimeout(acTimers.artist);
-    if (val.length < 2) { acHide('artist'); return; }
-    acTimers.artist = setTimeout(async function() {
-      acShow('artist', '<div class="ac-loading">Searching...</div>');
-      try {
-        var res = await fetch('https://musicbrainz.org/ws/2/artist/?query=' + encodeURIComponent(val) + '&limit=6&fmt=json', {
-          headers: { 'User-Agent': 'MiiMusic/1.0 (contact@miimediatv.com)' }
-        });
-        var data = await res.json();
-        var items = (data.artists || []).map(function(a) {
-          return { name: a.name, type: a.type || '', country: a.country || '' };
-        });
-        // Deduplicate
-        var seen = {};
-        items = items.filter(function(i) {
-          if (seen[i.name.toLowerCase()]) return false;
-          seen[i.name.toLowerCase()] = true;
-          return true;
-        });
-        acResults.artist = items;
-        acActiveIdx.artist = -1;
-        if (!items.length) { acHide('artist'); return; }
-        acRender('artist', items.map(function(item, idx) {
-          var sub = [item.type, item.country].filter(Boolean).join(' · ');
-          return '<div class="ac-item" onmousedown="acPickArtist(' + idx + ')">'
-            + '<div class="ac-art-placeholder">🎤</div>'
-            + '<div class="ac-info"><div class="ac-title">' + esc(item.name) + '</div>'
-            + (sub ? '<div class="ac-sub">' + esc(sub) + '</div>' : '') + '</div></div>';
-        }).join(''));
-      } catch(e) { acHide('artist'); }
-    }, 350);
+  function acArtist(val) {
+    clearTimeout(acArtistTimer);
+    var dd = document.getElementById('ac-artist');
+    if (!val || val.length < 2) { dd.style.display = 'none'; return; }
+    dd.innerHTML = '<div class="ac-loading">Searching...</div>';
+    dd.style.display = 'block';
+    acArtistTimer = setTimeout(function() { acFetchArtist(val); }, 400);
+  }
+
+  async function acFetchSong(val) {
+    var dd = document.getElementById('ac-song');
+    try {
+      var url = 'https://itunes.apple.com/search?term=' + encodeURIComponent(val) + '&entity=song&limit=8&media=music';
+      var res = await fetch(url);
+      if (!res.ok) { dd.style.display = 'none'; return; }
+      var data = await res.json();
+      var results = data.results || [];
+      // Deduplicate by track+artist
+      var seen = {};
+      acSongResults = results.filter(function(r) {
+        var key = (r.trackName + r.artistName).toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      }).slice(0, 6);
+      acSongIdx = -1;
+      if (!acSongResults.length) { dd.style.display = 'none'; return; }
+      dd.innerHTML = acSongResults.map(function(r, i) {
+        return '<div class="ac-item" onmousedown="acPickSong(' + i + ')">'
+          + '<img class="ac-art" src="' + r.artworkUrl60 + '" alt="">'
+          + '<div class="ac-info">'
+          + '<div class="ac-title">' + esc(r.trackName) + '</div>'
+          + '<div class="ac-sub">' + esc(r.artistName) + ' · ' + esc(r.collectionName || '') + '</div>'
+          + '</div></div>';
+      }).join('');
+      dd.style.display = 'block';
+    } catch(e) {
+      console.error('Autocomplete error:', e);
+      dd.style.display = 'none';
+    }
+  }
+
+  async function acFetchArtist(val) {
+    var dd = document.getElementById('ac-artist');
+    try {
+      var url = 'https://itunes.apple.com/search?term=' + encodeURIComponent(val) + '&entity=musicArtist&limit=6';
+      var res = await fetch(url);
+      if (!res.ok) { dd.style.display = 'none'; return; }
+      var data = await res.json();
+      var seen = {};
+      acArtistResults = (data.results || []).filter(function(r) {
+        if (seen[r.artistName.toLowerCase()]) return false;
+        seen[r.artistName.toLowerCase()] = true;
+        return true;
+      }).slice(0, 6);
+      acArtistIdx = -1;
+      if (!acArtistResults.length) { dd.style.display = 'none'; return; }
+      dd.innerHTML = acArtistResults.map(function(r, i) {
+        return '<div class="ac-item" onmousedown="acPickArtist(' + i + ')">'
+          + '<div class="ac-art-placeholder">&#127908;</div>'
+          + '<div class="ac-info">'
+          + '<div class="ac-title">' + esc(r.artistName) + '</div>'
+          + '<div class="ac-sub">' + esc(r.primaryGenreName || '') + '</div>'
+          + '</div></div>';
+      }).join('');
+      dd.style.display = 'block';
+    } catch(e) {
+      dd.style.display = 'none';
+    }
   }
 
   function acPickSong(idx) {
-    var item = acResults.song[idx];
+    var item = acSongResults[idx];
     if (!item) return;
-    document.getElementById('f-song').value = item.title;
-    if (item.artist && !document.getElementById('f-artist').value) {
-      document.getElementById('f-artist').value = item.artist;
+    document.getElementById('f-song').value = item.trackName;
+    if (item.artistName && !document.getElementById('f-artist').value.trim()) {
+      document.getElementById('f-artist').value = item.artistName;
     }
-    acHide('song');
+    document.getElementById('ac-song').style.display = 'none';
   }
 
   function acPickArtist(idx) {
-    var item = acResults.artist[idx];
+    var item = acArtistResults[idx];
     if (!item) return;
-    document.getElementById('f-artist').value = item.name;
-    acHide('artist');
-  }
-
-  function acShow(type, html) {
-    var el = document.getElementById('ac-' + type);
-    if (!el) return;
-    el.innerHTML = html;
-    el.style.display = 'block';
-  }
-
-  function acRender(type, html) {
-    var el = document.getElementById('ac-' + type);
-    if (!el) return;
-    el.innerHTML = html;
-    el.style.display = html ? 'block' : 'none';
+    document.getElementById('f-artist').value = item.artistName;
+    document.getElementById('ac-artist').style.display = 'none';
   }
 
   function acHide(type) {
     var el = document.getElementById('ac-' + type);
     if (el) el.style.display = 'none';
-    acActiveIdx[type] = -1;
   }
 
   function acKeyDown(e, type) {
@@ -563,34 +557,28 @@
     if (!dd || dd.style.display === 'none') return;
     var items = dd.querySelectorAll('.ac-item');
     if (!items.length) return;
+    var idx = type === 'song' ? acSongIdx : acArtistIdx;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      acActiveIdx[type] = Math.min(acActiveIdx[type] + 1, items.length - 1);
-      acHighlight(type, items);
+      idx = Math.min(idx + 1, items.length - 1);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      acActiveIdx[type] = Math.max(acActiveIdx[type] - 1, -1);
-      acHighlight(type, items);
-    } else if (e.key === 'Enter' && acActiveIdx[type] >= 0) {
+      idx = Math.max(idx - 1, -1);
+    } else if (e.key === 'Enter' && idx >= 0) {
       e.preventDefault();
-      if (type === 'song') acPickSong(acActiveIdx[type]);
-      else acPickArtist(acActiveIdx[type]);
+      type === 'song' ? acPickSong(idx) : acPickArtist(idx);
+      return;
     } else if (e.key === 'Escape') {
-      acHide(type);
-    }
-  }
-
-  function acHighlight(type, items) {
-    items.forEach(function(el, i) {
-      el.classList.toggle('ac-active', i === acActiveIdx[type]);
-    });
-    if (acActiveIdx[type] >= 0) items[acActiveIdx[type]].scrollIntoView({ block: 'nearest' });
+      acHide(type); return;
+    } else { return; }
+    if (type === 'song') acSongIdx = idx; else acArtistIdx = idx;
+    items.forEach(function(el, i) { el.classList.toggle('ac-active', i === idx); });
+    if (idx >= 0) items[idx].scrollIntoView({ block: 'nearest' });
   }
 
   function esc(s) {
-    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
-
 </script>
 <script>
   // ── CONFIG ────────────────────────────────────────────────
