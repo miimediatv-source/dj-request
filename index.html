@@ -31,7 +31,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .ticker{background:#1a0f00;border-top:2px solid #ff6b35;border-bottom:2px solid #ff6b35;padding:.4rem 0;overflow:hidden;white-space:nowrap;position:relative;z-index:2}
 .ticker-inner{display:inline-block;animation:marquee 45s linear infinite;font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:3px;color:#ff6b35;text-transform:uppercase}
 .ticker-inner span{margin:0 3rem}
-.ticker-announce{color:#fff !important;background:#ff6b35;padding:.15rem .8rem;margin:0 2rem !important;letter-spacing:2px}
+.ticker-announce{margin:0 3rem;}
 
 /* STATUS BANNER */
 .status-banner{display:none;text-align:center;padding:.6rem 1rem;font-family:'Oswald',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;position:relative;z-index:2}
@@ -52,7 +52,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .venue-img{width:100%;display:block;filter:sepia(.3) contrast(1.1)}
 
 .neon-title{font-family:'Alfa Slab One',serif;font-size:clamp(2.8rem,10vw,4.5rem);color:#ff6b35;animation:neonPulse 3s ease-in-out infinite,flicker 8s infinite;line-height:1;letter-spacing:2px;text-transform:uppercase}
-.event-tag{display:inline-block;background:#1a0f00;border:2px solid #ff6b35;color:#ff6b35;font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;padding:.3rem 1rem;margin:.5rem 0;animation:shimmer 2s infinite}
+.event-tag{display:none;background:#1a0f00;border:2px solid #ff6b35;color:#ff6b35;font-family:'Oswald',sans-serif;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;padding:.3rem 1rem;margin:.5rem 0;animation:shimmer 2s infinite}
 .venue-tag{font-family:'Special Elite',cursive;font-size:.8rem;color:#c4a882;letter-spacing:1px;margin-bottom:1rem}
 .announcement{display:none;background:#1a0f00;border:2px solid #ff6b35;padding:.85rem 1.1rem;margin-bottom:1.25rem;position:relative;text-align:center;animation:glow 3s ease-in-out infinite}
 .announcement::before{content:'📢';position:absolute;top:-.7rem;left:50%;transform:translateX(-50%);background:#0d0800;padding:0 .5rem;font-size:1rem}
@@ -481,13 +481,15 @@ function updateAnnouncementUI(txt) {
       banner.textContent = '🟢 Requests are open — send yours below!';
       if (overlay) overlay.classList.remove('show');
       if (grid) grid.style.display = 'grid';
+      var evTag = document.getElementById('l-event'); if (evTag) evTag.style.display = 'inline-block';
       if (chip) chip.style.display = '';
       if (prompt) prompt.style.display = '';
     } else {
-      banner.className = 'status-banner closed';
-      banner.textContent = '🔴 Requests are currently closed';
+      banner.className = 'status-banner';
+      banner.textContent = '';
       if (overlay) overlay.classList.add('show');
       if (grid) grid.style.display = 'none';
+      var evTag2 = document.getElementById('l-event'); if (evTag2) evTag2.style.display = 'none';
       if (chip) chip.style.display = 'none';
       if (prompt) prompt.style.display = 'none';
       show('screen-landing');
