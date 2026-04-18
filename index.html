@@ -532,8 +532,6 @@ function updateAnnouncementUI(txt) {
     var btn = document.getElementById('submit-btn');
     btn.className = 'submit-btn ' + type;
     btn.textContent = isKaraoke ? 'Submit Karaoke Request' : 'Send Song Request';
-    document.getElementById('succ-icon').className = 'success-icon ' + type;
-    document.getElementById('succ-icon').textContent = isKaraoke ? '🎤' : '🎵';
     document.getElementById('f-song').value = '';
     document.getElementById('f-artist').value = '';
     document.getElementById('f-name').value = '';
