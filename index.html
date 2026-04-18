@@ -519,7 +519,6 @@ function updateAnnouncementUI(txt) {
   }
 
   function openForm(type) {
-    if (!requestsLive) { show('screen-landing'); return; }
     currentType = type;
     var isKaraoke = type === 'karaoke';
     var badge = document.getElementById('form-badge');
