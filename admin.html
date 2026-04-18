@@ -4,54 +4,65 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mii-Music — Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Special+Elite&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root { color-scheme: dark; }
   html { background: #0a0a0f; }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: #0a0a0f; color: #f0eef8; min-height: 100vh; }
+  :root { color-scheme: dark; }
+  html { background: #0d0800; }
+  body { font-family: 'Special Elite', cursive; background: #0d0800; color: #f5e6c8; min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px); pointer-events: none; z-index: 1000; }
 
-  .nav { display: flex; border-bottom: 1px solid #1e1e2e; background: #0a0a0f; position: sticky; top: 0; z-index: 10; }
-  .nav-tab { flex: 1; padding: .85rem .25rem; text-align: center; font-size: .62rem; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase; color: #9997b0; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .2s; }
-  .nav-tab.active { color: #a78be8; border-bottom-color: #6c3fc5; }
+  .nav { display: flex; border-bottom: 2px solid #ff6b35; background: #0d0800; position: sticky; top: 0; z-index: 10; }
+  .nav-tab { flex: 1; padding: .85rem .25rem; text-align: center; font-size: .62rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: #8a7260; cursor: pointer; border: none; background: #0d0800; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: color .2s; font-family: 'Oswald', sans-serif; }
+  .nav-tab.active { color: #ff6b35; border-bottom-color: #ff6b35; }
 
-  .hero { padding: 2rem 2rem 1.75rem; text-align: center; border-bottom: 1px solid #1e1e2e; }
-  .vinyl { width: 52px; height: 52px; background: #1a1a2e; border-radius: 50%; border: 3px solid #6c3fc5; margin: 0 auto .9rem; display: flex; align-items: center; justify-content: center; }
-  .vinyl::after { content: ''; width: 14px; height: 14px; background: #6c3fc5; border-radius: 50%; }
-  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 4px; color: #fff; line-height: 1; }
-  .hero h1 span { color: #a78be8; }
-  .hero-sub { font-size: .7rem; color: #9997b0; letter-spacing: 1.5px; text-transform: uppercase; margin-top: .3rem; }
+  @keyframes marquee{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+  @keyframes neonPulse{0%,100%{text-shadow:0 0 7px #ff6b35,0 0 14px #ff6b35}50%{text-shadow:0 0 4px #ff6b35,0 0 8px #ff6b35}}
+  @keyframes vinylSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes shimmer{0%,100%{opacity:.7}50%{opacity:1}}
+  .admin-ticker{background:#1a0f00;border-top:1px solid #ff6b35;border-bottom:1px solid #ff6b35;padding:.3rem 0;overflow:hidden;white-space:nowrap;position:relative;z-index:2;flex-shrink:0}
+  .admin-ticker-inner{display:inline-block;animation:marquee 25s linear infinite;font-family:'Oswald',sans-serif;font-size:.65rem;letter-spacing:3px;color:#ff6b35;text-transform:uppercase;opacity:.7}
+  .admin-ticker-inner span{margin:0 2rem}
+  @keyframes glow{0%,100%{box-shadow:0 0 8px #ff6b35,inset 0 0 8px rgba(255,107,53,.1)}50%{box-shadow:0 0 20px #ff6b35,0 0 40px rgba(255,107,53,.3),inset 0 0 15px rgba(255,107,53,.1)}}
+  .hero { padding: 1.5rem 2rem 1.25rem; text-align: center; border-bottom: 2px solid #ff6b35; background: #0d0800; position: relative; }
+  .vinyl { width: 52px; height: 52px; border-radius: 50%; background: repeating-radial-gradient(circle,#111 0,#111 3px,#1a0f00 3px,#1a0f00 6px); border: 3px solid #ff6b35; margin: 0 auto .75rem; display: flex; align-items: center; justify-content: center; position: relative; animation: vinylSpin 6s linear infinite; box-shadow: 0 0 12px rgba(255,107,53,.4); }
+  .vinyl::after { content: ''; width: 14px; height: 14px; background: #ff6b35; border-radius: 50%; box-shadow: 0 0 6px rgba(255,107,53,.8); }
+  .hero h1 { font-family: 'Alfa Slab One', serif; font-size: 2.2rem; letter-spacing: 3px; color: #ff6b35; line-height: 1; animation: neonPulse 3s ease-in-out infinite; text-transform: uppercase; }
+  .hero h1 span { color: #f5e6c8; }
+  .hero-sub { font-size: .68rem; color: #8a7260; letter-spacing: 2px; text-transform: uppercase; margin-top: .3rem; font-family: 'Oswald', sans-serif; }
 
   .panel { display: none; padding: 1.75rem; max-width: 580px; margin: 0 auto; }
   .panel.active { display: block; }
 
   .label { font-size: .66rem; letter-spacing: 2px; text-transform: uppercase; color: #9997b0; margin-bottom: .55rem; }
   .field { margin-bottom: 1.3rem; }
-  input[type=text], input[type=tel] { width: 100%; background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .75rem 1rem; color: #f0eef8; font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none; transition: border-color .2s; }
-  input:focus { border-color: #6c3fc5; }
-  input::placeholder { color: #34324a; }
+  input[type=text], input[type=tel] { width: 100%; background: #1a0f00; border: 2px solid #3a2010; border-radius: 0; padding: .75rem 1rem; color: #f5e6c8; font-family: 'Special Elite', cursive; font-size: .95rem; outline: none; transition: all .2s; }
+  input:focus { border-color: #ff6b35; box-shadow: 0 0 8px rgba(255,107,53,.2); }
+  input::placeholder { color: #4a3020; font-family: 'Special Elite', cursive; }
 
-  .btn { width: 100%; padding: .85rem; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; cursor: pointer; transition: background .2s, transform .1s; }
+  .btn { width: 100%; padding: .85rem; border: none; border-radius: 0; font-family: 'Alfa Slab One', serif; font-size: 1.1rem; letter-spacing: 2px; cursor: pointer; transition: all .2s; text-transform: uppercase; }
   .btn:active { transform: scale(.98); }
-  .btn-purple { background: #6c3fc5; color: #fff; }
-  .btn-purple:hover { background: #7d52d4; }
+  .btn-purple { background: #ff6b35; color: #0d0800; }
+  .btn-purple:hover { background: #ff8c5a; box-shadow: 0 0 15px rgba(255,107,53,.5); }
   .btn-green { background: #1db954; color: #fff; }
   .btn-green:hover { background: #1ed760; }
-  .btn-outline { background: transparent; border: 1px solid #2a2840; color: #a78be8; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; margin-top: .65rem; }
-  .btn-outline:hover { border-color: #6c3fc5; background: #12121c; }
-  .btn-sm { width: auto; padding: .32rem .8rem; font-size: .72rem; font-family: 'DM Sans', sans-serif; font-weight: 500; letter-spacing: .5px; border-radius: 6px; }
+  .btn-outline { background: transparent; border: 2px solid #ff6b35; color: #ff6b35; font-family: 'Oswald', sans-serif; font-size: .85rem; font-weight: 500; margin-top: .65rem; border-radius: 0; letter-spacing: 1px; }
+  .btn-outline:hover { background: #ff6b35; color: #0d0800; }
+  .btn-sm { width: auto; padding: .32rem .8rem; font-size: .72rem; font-family: 'Oswald', sans-serif; font-weight: 500; letter-spacing: 1px; border-radius: 0; }
 
-  .divider { height: 1px; background: #1e1e2e; margin: 1.4rem 0; }
+  .divider { height: 2px; background: #2a1800; margin: 1.4rem 0; }
 
-  .live-badge { display: inline-flex; align-items: center; gap: 6px; background: #0d2e1a; border: 1px solid rgba(34,197,94,.25); border-radius: 100px; padding: .28rem .85rem; font-size: .68rem; color: #22c55e; }
+  .live-badge { display: inline-flex; align-items: center; gap: 6px; background: #001a00; border: 1px solid rgba(57,255,20,.3); border-radius: 0; padding: .28rem .85rem; font-size: .68rem; color: #39ff14; font-family: 'Oswald', sans-serif; letter-spacing: 1px; }
   .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
   /* SPOTIFY CONNECT BAR */
-  .spotify-bar { display: flex; align-items: center; justify-content: space-between; background: #0d1a0d; border: 1px solid rgba(29,185,84,.25); border-radius: 10px; padding: .85rem 1.1rem; margin-bottom: 1.25rem; gap: 1rem; }
-  .spotify-bar.connected { border-color: rgba(29,185,84,.5); background: #0a1f0a; }
+  .spotify-bar { display: flex; align-items: center; justify-content: space-between; background: #001a00; border: 1px solid rgba(29,185,84,.25); border-radius: 0; padding: .85rem 1.1rem; margin-bottom: 1.25rem; gap: 1rem; }
+  .spotify-bar.connected { border-color: rgba(57,255,20,.4); background: #001500; }
   .spotify-info { display: flex; align-items: center; gap: .75rem; }
   .spotify-logo { width: 28px; height: 28px; flex-shrink: 0; }
   .spotify-status { font-size: .82rem; font-weight: 500; }
@@ -64,57 +75,73 @@
   .spotify-btn.disconnect:hover { border-color: #e24b4a; color: #e24b4a; }
 
   /* QR */
-  .qr-wrap { background: #fff; border-radius: 12px; padding: 1rem; width: fit-content; margin: 0 auto 1.25rem; }
-  .url-box { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; padding: .65rem 1rem; font-size: .78rem; color: #6b6880; font-family: monospace; word-break: break-all; margin-bottom: .75rem; }
+  .qr-wrap { background: #fff; border: 3px solid #ff6b35; padding: 1rem; width: fit-content; margin: 0 auto 1.25rem; box-shadow: 0 0 20px rgba(255,107,53,.3); }
+  .url-box { background: #1a0f00; border: 1px solid #3a2010; border-radius: 0; padding: .65rem 1rem; font-size: .78rem; color: #8a7260; font-family: monospace; word-break: break-all; margin-bottom: .75rem; }
 
 
   /* LIVE TOGGLE */
-  .live-toggle { display: flex; align-items: center; gap: .6rem; background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .35rem .35rem .35rem .9rem; cursor: pointer; transition: all .25s; user-select: none; }
-  .live-toggle.is-live { background: #0d2e1a; border-color: rgba(34,197,94,.4); }
-  .live-toggle.is-closed { background: #2e0d0d; border-color: rgba(226,75,74,.4); }
+  .live-toggle { display: flex; align-items: center; gap: .6rem; background: #1a0f00; border: 2px solid #3a2010; border-radius: 0; padding: .35rem .35rem .35rem .9rem; cursor: pointer; transition: all .25s; user-select: none; }
+  .live-toggle.is-live { background: #001a00; border-color: rgba(57,255,20,.5); }
+  .live-toggle.is-closed { background: #1a0000; border-color: rgba(255,51,51,.5); }
   .live-toggle-label { font-size: .72rem; font-weight: 500; letter-spacing: 1px; color: #9997b0; transition: color .25s; }
-  .live-toggle.is-live .live-toggle-label { color: #22c55e; }
+  .live-toggle.is-live .live-toggle-label { color: #39ff14; }
   .live-toggle.is-closed .live-toggle-label { color: #e24b4a; }
-  .live-toggle-pip { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .8rem; transition: background .25s; background: #1a1830; flex-shrink: 0; }
-  .live-toggle.is-live .live-toggle-pip { background: #22c55e; }
+  .live-toggle-pip { width: 28px; height: 28px; border-radius: 0; display: flex; align-items: center; justify-content: center; font-size: .8rem; transition: background .25s; background: #1a1830; flex-shrink: 0; }
+  .live-toggle.is-live .live-toggle-pip { background: #39ff14; color: #001a00; }
   .live-toggle.is-closed .live-toggle-pip { background: #e24b4a; }
 
   /* FILTER TABS */
   .filter-tabs { display: flex; gap: .5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-  .ftab { background: #12121c; border: 1px solid #2a2840; border-radius: 100px; padding: .28rem .9rem; font-size: .72rem; font-weight: 500; color: #9997b0; cursor: pointer; transition: all .2s; }
-  .ftab.active { background: #16122a; border-color: #6c3fc5; color: #a78be8; }
-  .ftab.karaoke-tab.active { background: #1a0e1a; border-color: #ec4899; color: #f472b6; }
+  .ftab { background: #1a0f00; border: 1px solid #3a2010; border-radius: 0; padding: .28rem .9rem; font-size: .72rem; font-weight: 500; color: #8a7260; cursor: pointer; transition: all .2s; font-family: 'Oswald', sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+  .ftab.active { background: #2a1800; border-color: #ff6b35; color: #ff6b35; }
+  .ftab.karaoke-tab.active { background: #1a001a; border-color: #ff1493; color: #ff1493; }
   .ftab.pending-tab.active { background: #1a1200; border-color: #f59e0b; color: #fbbf24; }
 
   /* BOARD */
   .board-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; flex-wrap: wrap; gap: .5rem; }
-  .board-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; color: #fff; }
+  .board-title { font-family: 'Alfa Slab One', serif; font-size: 1.6rem; letter-spacing: 2px; color: #ff6b35; text-transform: uppercase; }
 
-  .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  /* ANNOUNCEMENT */
+  .announce-box { background: #1a0f00; border: 2px solid #ff6b35; border-radius: 0; padding: 1.1rem; margin-bottom: 1.25rem; animation: glow 3s ease-in-out infinite; }
+  .announce-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .65rem; }
+  .announce-title { font-size: .82rem; font-weight: 500; color: #ff6b35; font-family: 'Alfa Slab One', serif; letter-spacing: 1px; text-transform: uppercase; }
+  .announce-live-badge { font-size: .68rem; color: #22c55e; display: none; }
+  .announce-live-badge.show { display: inline; }
+  textarea.announce-input { width: 100%; background: #0d0800; border: 1px solid #2a2840; border-radius: 6px; padding: .65rem .9rem; color: #f0eef8; font-family: 'DM Sans', sans-serif; font-size: .88rem; outline: none; resize: vertical; min-height: 70px; transition: border-color .2s; line-height: 1.5; box-sizing: border-box; }
+  textarea.announce-input:focus { border-color: #ff6b35; box-shadow: 0 0 8px rgba(255,107,53,.2); }
+  textarea.announce-input::placeholder { color: #34324a; }
+  .announce-actions { display: flex; gap: .5rem; margin-top: .6rem; }
+  .announce-save { background: #ff6b35; border: none; border-radius: 6px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 500; padding: .4rem 1rem; cursor: pointer; transition: background .2s; }
+  .announce-save:hover { background: #ff8c5a; }
+  .announce-clear { background: transparent; border: 1px solid #2a2840; border-radius: 6px; color: #6b6880; font-family: 'DM Sans', sans-serif; font-size: .78rem; padding: .4rem .9rem; cursor: pointer; transition: all .2s; }
+  .announce-clear:hover { border-color: #e24b4a; color: #e24b4a; }
+  .announce-preview { font-size: .7rem; color: #5c5a75; margin-top: .5rem; font-style: italic; }
+
+    .legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: .68rem; color: #9997b0; }
   .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
   .ld-pending { background: #f59e0b; } .ld-approved { background: #22c55e; } .ld-playing { background: #6c3fc5; } .ld-played { background: #3a3850; }
 
   .req-list { display: flex; flex-direction: column; gap: .7rem; }
-  .req-card { background: #12121c; border: 1px solid #2a2840; border-radius: 12px; padding: .95rem 1.1rem; display: flex; align-items: flex-start; gap: .9rem; transition: border-color .2s, opacity .2s; animation: slideIn .3s ease; }
+  .req-card { background: #1a0f00; border: 1px solid #3a2010; border-radius: 0; padding: .95rem 1.1rem; display: flex; align-items: flex-start; gap: .9rem; transition: border-color .2s, opacity .2s; animation: slideIn .3s ease; }
   @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
   .req-card.status-pending { border-left: 3px solid #f59e0b; }
-  .req-card.status-approved { border-left: 3px solid #22c55e; }
-  .req-card.status-playing { border-color: #6c3fc5; background: #16122a; }
+  .req-card.status-approved { border-left: 3px solid #39ff14; }
+  .req-card.status-playing { border-color: #ff6b35; background: #2a1800; animation: glow 3s ease-in-out infinite; }
   .req-card.status-played { opacity: .4; }
-  .req-card.karaoke-card.status-playing { border-color: #ec4899; background: #1a0e1a; }
+  .req-card.karaoke-card.status-playing { border-color: #ff1493; background: #1a001a; }
 
   .status-pill { display: inline-flex; align-items: center; gap: 4px; border-radius: 4px; padding: 2px 7px; font-size: .62rem; font-weight: 500; margin-top: 4px; }
-  .pill-pending { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
-  .pill-approved { background: rgba(34,197,94,.12); color: #22c55e; border: 1px solid rgba(34,197,94,.2); }
-  .pill-playing { background: rgba(108,63,197,.15); color: #a78be8; border: 1px solid rgba(108,63,197,.25); }
+  .pill-pending { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.3); border-radius: 0; }
+  .pill-approved { background: rgba(57,255,20,.08); color: #39ff14; border: 1px solid rgba(57,255,20,.25); border-radius: 0; }
+  .pill-playing { background: rgba(255,107,53,.15); color: #ff6b35; border: 1px solid rgba(255,107,53,.3); border-radius: 0; }
   .pill-played { background: rgba(255,255,255,.05); color: #9997b0; border: 1px solid rgba(255,255,255,.08); }
 
   .type-pip { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; margin-top: 2px; }
   .pip-music { background: rgba(108,63,197,.15); } .pip-karaoke { background: rgba(236,72,153,.15); }
 
   .req-info { flex: 1; min-width: 0; }
-  .req-song { font-weight: 500; font-size: .93rem; color: #f0eef8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .req-song { font-family: 'Special Elite', cursive; font-size: .93rem; color: #f5e6c8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .req-artist { font-size: .76rem; color: #6b6880; margin-top: 2px; }
   .req-meta { font-size: .68rem; color: #7a7890; margin-top: 3px; }
 
@@ -133,9 +160,9 @@
   .spotify-not-found { font-size: .72rem; color: #7a7890; padding: .4rem 0; }
 
   .req-actions { display: flex; gap: .35rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; max-width: 72px; }
-  .icon-btn { background: #1a1830; border: 1px solid #2a2840; border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; transition: all .2s; color: #9997b0; }
-  .icon-btn.approve:hover { background: #0d2e1a; border-color: #22c55e; color: #22c55e; }
-  .icon-btn.play:hover { background: #16122a; border-color: #6c3fc5; color: #a78be8; }
+  .icon-btn { background: #1a0f00; border: 1px solid #2a2840; border-radius: 6px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; transition: all .2s; color: #9997b0; }
+  .icon-btn.approve:hover { background: #001a00; border-color: #22c55e; color: #22c55e; }
+  .icon-btn.play:hover { background: #2a1800; border-color: #ff6b35; color: #ff6b35; }
   .icon-btn.done:hover { background: #1a1a0d; border-color: #6b7280; color: #9ca3af; }
   .icon-btn.del:hover { background: #2e0d0d; border-color: #e24b4a; color: #e24b4a; }
 
@@ -144,27 +171,32 @@
   .empty-txt { font-size: .82rem; }
 
   /* DISPLAY */
-  .display-screen { background: #06060f; border: 1px solid #1e1e2e; border-radius: 16px; padding: 2rem; min-height: 380px; }
+  .display-screen { background: #080400; border: 2px solid #ff6b35; border-radius: 0; padding: 2rem; min-height: 380px; box-shadow: 0 0 20px rgba(255,107,53,.15); }
   .np-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #7a7890; margin-bottom: .5rem; }
-  .np-song { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; color: #fff; line-height: 1.1; }
+  .np-song { font-family: 'Alfa Slab One', serif; font-size: 2rem; letter-spacing: 2px; color: #ff6b35; line-height: 1.1; animation: neonPulse 3s ease-in-out infinite; }
   .np-artist { font-size: .9rem; color: #a78be8; margin-top: .25rem; }
   .np-art { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; display: none; }
   .np-type { font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; margin-top: .4rem; }
-  .np-type.karaoke { color: #f472b6; } .np-type.music { color: #a78be8; }
+  .np-type.karaoke { color: #ff1493; } .np-type.music { color: #a78be8; }
   .np-empty { font-size: .88rem; color: #6b6880; font-style: italic; }
+  .np-requester { font-size: .72rem; color: #6b6880; margin-top: .3rem; letter-spacing: .5px; }
   .queue-label { font-size: .62rem; letter-spacing: 2px; text-transform: uppercase; color: #7a7890; margin-bottom: .75rem; }
-  .q-item { display: flex; align-items: center; gap: .8rem; background: #0e0e1a; border: 1px solid #1a1a2e; border-radius: 8px; padding: .6rem .9rem; margin-bottom: .45rem; }
+  .q-item { display: flex; align-items: center; gap: .8rem; background: #1a0f00; border: 1px solid #3a2010; border-radius: 0; padding: .6rem .9rem; margin-bottom: .45rem; }
   .q-num { font-family: 'Bebas Neue', sans-serif; font-size: .95rem; color: #6b6880; min-width: 18px; }
   .q-art { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
   .q-song { font-size: .82rem; font-weight: 500; color: #d0ceea; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .q-sub { font-size: .7rem; color: #9997b0; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .q-pip { font-size: .75rem; margin-left: auto; flex-shrink: 0; }
+  .q-type-badge { font-size: .62rem; font-weight: 500; padding: 2px 7px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+  .q-type-badge.song { background: rgba(108,63,197,.15); color: #a78be8; }
+  .q-type-badge.karaoke { background: rgba(236,72,153,.15); color: #f472b6; }
+  .q-requester { font-size: .68rem; color: #6b6880; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .fullscreen-btn { background: #12121c; border: 1px solid #2a2840; border-radius: 8px; color: #6b6880; font-family: 'DM Sans', sans-serif; font-size: .75rem; padding: .45rem .9rem; cursor: pointer; transition: border-color .2s; }
-  .fullscreen-btn:hover { border-color: #6c3fc5; color: #a78be8; }
+  .fullscreen-btn { background: #1a0f00; border: 2px solid #3a2010; border-radius: 0; color: #8a7260; font-family: 'Oswald', sans-serif; font-size: .75rem; padding: .45rem .9rem; cursor: pointer; transition: all .2s; letter-spacing: 1px; text-transform: uppercase; }
+  .fullscreen-btn:hover { border-color: #ff6b35; color: #ff6b35; background: #2a1800; }
   .display-hint { font-size: .68rem; color: #8885a0; text-align: center; margin-top: .75rem; }
 
-  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1830; border: 1px solid #2a2840; border-radius: 8px; padding: .6rem 1.25rem; font-size: .8rem; color: #a78be8; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; max-width: 90vw; }
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a0f00; border: 2px solid #ff6b35; border-radius: 0; padding: .6rem 1.25rem; font-size: .78rem; color: #ff6b35; font-family: 'Oswald', sans-serif; letter-spacing: 1px; text-transform: uppercase; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; max-width: 90vw; box-shadow: 0 0 20px rgba(255,107,53,.3); }
   .toast.show { opacity: 1; }
 </style>
 </head>
@@ -172,10 +204,11 @@
 
 <div class="hero">
   <div class="vinyl"></div>
-  <h1>Mii<span>-</span>Music</h1>
+  <h1>Mii-Music</h1>
   <div class="hero-sub">Admin Panel</div>
 </div>
 
+<div class="admin-ticker"><div class="admin-ticker-inner"><span>⚙ ADMIN PANEL</span><span>🎵 MANAGE REQUESTS</span><span>📢 CROWD ANNOUNCEMENTS</span><span>🎤 KARAOKE CONTROL</span><span>⚙ ADMIN PANEL</span><span>🎵 MANAGE REQUESTS</span><span>📢 CROWD ANNOUNCEMENTS</span><span>🎤 KARAOKE CONTROL</span></div></div>
 <nav class="nav">
   <button class="nav-tab active" onclick="go('setup')">Setup</button>
   <button class="nav-tab" onclick="go('share')">QR Code</button>
@@ -231,7 +264,21 @@
     <button class="spotify-btn" id="spotify-connect-btn" onclick="spotifyLogin()">Connect Spotify</button>
   </div>
 
-  <div class="legend">
+  <!-- Announcement editor -->
+  <div class="announce-box">
+    <div class="announce-header">
+      <span class="announce-title">📢 Crowd Announcement</span>
+      <span class="announce-live-badge" id="announce-live-badge">● Live to crowd</span>
+    </div>
+    <textarea class="announce-input" id="announce-input" placeholder="e.g. Last orders at midnight! Next karaoke slot in 30 mins..."></textarea>
+    <div class="announce-actions">
+      <button class="announce-save" onclick="saveAnnouncement()">Show to crowd</button>
+      <button class="announce-clear" onclick="clearAnnouncement()">Clear</button>
+    </div>
+    <div class="announce-preview" id="announce-preview">No announcement showing</div>
+  </div>
+
+    <div class="legend">
     <div class="legend-item"><div class="legend-dot ld-pending"></div>Awaiting approval</div>
     <div class="legend-item"><div class="legend-dot ld-approved"></div>Approved — on display</div>
     <div class="legend-item"><div class="legend-dot ld-playing"></div>Now playing</div>
@@ -491,6 +538,44 @@ async function searchAllApproved() {
 }
 
 
+
+// ── ANNOUNCEMENT ──────────────────────────────────────────────
+async function loadAnnouncement() {
+  try {
+    var res = await sb.from('settings').select('value').eq('key', 'announcement').single();
+    if (res.data && res.data.value) {
+      document.getElementById('announce-input').value = res.data.value;
+      updateAnnounceBadge(res.data.value);
+    }
+  } catch(e) {}
+}
+
+async function saveAnnouncement() {
+  var txt = document.getElementById('announce-input').value.trim();
+  await sb.from('settings').upsert({ key: 'announcement', value: txt });
+  updateAnnounceBadge(txt);
+  showToast(txt ? '📢 Announcement live — crowd can see it now' : '📢 Announcement cleared');
+}
+
+async function clearAnnouncement() {
+  document.getElementById('announce-input').value = '';
+  await sb.from('settings').upsert({ key: 'announcement', value: '' });
+  updateAnnounceBadge('');
+  showToast('Announcement cleared');
+}
+
+function updateAnnounceBadge(txt) {
+  var badge = document.getElementById('announce-live-badge');
+  var preview = document.getElementById('announce-preview');
+  if (txt && txt.trim()) {
+    badge.classList.add('show');
+    preview.textContent = 'Fans see: "' + txt.trim().substring(0, 60) + (txt.length > 60 ? '...' : '') + '"';
+  } else {
+    badge.classList.remove('show');
+    preview.textContent = 'No announcement showing';
+  }
+}
+
 // ── LIVE STATUS ───────────────────────────────────────────────
 var isLive = false;
 
@@ -712,8 +797,12 @@ function renderDisplay() {
   var art = document.getElementById('dp-art');
   if (playing) {
     s.textContent = playing.song; a.textContent = playing.artist || '';
-    tp.textContent = playing.type === 'karaoke' ? '🎤 Karaoke'+(playing.performer?' · '+playing.performer:'') : '🎵 Song Request';
+    var reqBy = playing.fan_name && playing.fan_name !== 'Anonymous' ? ' · Requested by ' + playing.fan_name : '';
+    tp.textContent = playing.type === 'karaoke' ? '🎤 Karaoke Request' + (playing.performer ? ' · ' + playing.performer : '') + reqBy : '🎵 Song Request' + reqBy;
     tp.className = 'np-type '+(playing.type||'music');
+    var dpReq = document.getElementById('dp-requester');
+    var reqName = playing.fan_name && playing.fan_name !== 'Anonymous' ? playing.fan_name : null;
+    if (dpReq) { dpReq.textContent = reqName ? 'Requested by ' + reqName : ''; dpReq.style.display = reqName ? 'block' : 'none'; }
     s.style.display = 'block'; a.style.display = playing.artist?'block':'none'; tp.style.display = 'block'; e.style.display = 'none';
     var cached = spotifyCache[playing.id];
     if (cached && cached !== 'searching' && cached.coverUrl) {
@@ -721,18 +810,28 @@ function renderDisplay() {
     } else { art.style.display = 'none'; }
   } else {
     s.style.display = 'none'; a.style.display = 'none'; tp.style.display = 'none'; e.style.display = 'block'; art.style.display = 'none';
+    var dpReq2 = document.getElementById('dp-requester'); if (dpReq2) dpReq2.style.display = 'none';
   }
   var ql = document.getElementById('queue-list');
   if (!queue.length) { ql.innerHTML = '<div style="font-size:.8rem;color:#6b6880;font-style:italic">No approved requests yet</div>'; return; }
   ql.innerHTML = queue.slice(0,6).map(function(r,i){
-    var sub = (r.artist||'')+(r.fan_name?' · from '+r.fan_name:'');
-    if (r.type==='karaoke'&&r.performer) sub='Performer: '+r.performer;
+    var artistLine = r.artist ? esc(r.artist) : '';
+    var requester = r.fan_name && r.fan_name !== 'Anonymous' ? esc(r.fan_name) : 'Anonymous';
+    var isKaraoke = r.type === 'karaoke';
+    var typeLabel = isKaraoke ? '🎤 Karaoke' : '🎵 Song';
+    var typeCls = isKaraoke ? 'karaoke' : 'song';
+    var subLine = isKaraoke && r.performer ? 'Performer: '+esc(r.performer) : artistLine;
     var cached = spotifyCache[r.id];
     var artUrl = (cached && cached !== 'searching' && cached.coverUrl) ? cached.coverUrl : '';
     return '<div class="q-item"><div class="q-num">'+(i+1)+'</div>'
       +(artUrl?'<img class="q-art" src="'+artUrl+'" alt="">':'')
-      +'<div style="min-width:0;flex:1"><div class="q-song">'+esc(r.song)+'</div><div class="q-sub">'+esc(sub)+'</div></div>'
-      +'<div class="q-pip">'+(r.type==='karaoke'?'🎤':'🎵')+'</div></div>';
+      +'<div style="min-width:0;flex:1">'
+        +'<div class="q-song">'+esc(r.song)+'</div>'
+        +(subLine?'<div class="q-sub">'+subLine+'</div>':'')
+        +'<div class="q-requester">Requested by '+requester+'</div>'
+      +'</div>'
+      +'<div class="q-type-badge '+typeCls+'">'+typeLabel+'</div>'
+      +'</div>';
   }).join('');
 }
 
@@ -810,7 +909,7 @@ function showToast(msg) {
 async function init() {
   await checkSpotifyCallback();
   sync();
-  await Promise.all([loadRequests(), loadLiveStatus()]);
+  await Promise.all([loadRequests(), loadLiveStatus(), loadAnnouncement()]);
   initRealtime();
   setInterval(loadRequests, 60000);
   setInterval(loadLiveStatus, 30000); // keep live status in sync
